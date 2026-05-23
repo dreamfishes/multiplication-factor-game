@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#136f63">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="因数小队">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>因数小队</title>
+    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="apple-touch-icon" href="./姐姐.png">
+    <link rel="icon" href="./app-icon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="./styles.css?v=3">
+  </head>
+  <body>
+    <main class="app-shell" aria-label="因数小队乘法游戏">
+      <div class="storybook-scene" aria-hidden="true">
+        <svg class="scene-svg" viewBox="0 0 1200 720" focusable="false">
+          <path class="rainbow-band band-1" d="M42 154 C190 30, 323 38, 474 156" />
+          <path class="rainbow-band band-2" d="M50 182 C195 67, 322 75, 466 184" />
+          <path class="rainbow-band band-3" d="M64 210 C202 104, 318 108, 452 212" />
+
+          <g class="cloud cloud-left">
+            <circle cx="80" cy="118" r="28" />
+            <circle cx="112" cy="96" r="38" />
+            <circle cx="154" cy="118" r="30" />
+            <rect x="78" y="114" width="98" height="34" rx="17" />
+          </g>
+          <g class="cloud cloud-right">
+            <circle cx="1000" cy="94" r="30" />
+            <circle cx="1036" cy="72" r="42" />
+            <circle cx="1086" cy="96" r="32" />
+            <rect x="1000" y="92" width="112" height="38" rx="19" />
+          </g>
+
+          <g class="bird bird-one">
+            <path d="M982 182 q24 -28 48 0" />
+            <path d="M1030 182 q24 -28 48 0" />
+          </g>
+          <g class="bird bird-two">
+            <path d="M900 230 q18 -20 36 0" />
+            <path d="M936 230 q18 -20 36 0" />
+          </g>
+
+          <g class="flower flower-a">
+            <path class="stem" d="M106 560 C116 496, 130 452, 166 410" />
+            <circle class="petal petal-1" cx="166" cy="390" r="22" />
+            <circle class="petal petal-2" cx="188" cy="414" r="22" />
+            <circle class="petal petal-3" cx="158" cy="434" r="22" />
+            <circle class="petal petal-4" cx="136" cy="406" r="22" />
+            <circle class="flower-core" cx="162" cy="412" r="17" />
+          </g>
+          <g class="flower flower-b">
+            <path class="stem" d="M1010 590 C996 520, 970 474, 926 434" />
+            <circle class="petal petal-1" cx="926" cy="414" r="20" />
+            <circle class="petal petal-2" cx="950" cy="436" r="20" />
+            <circle class="petal petal-3" cx="920" cy="458" r="20" />
+            <circle class="petal petal-4" cx="898" cy="430" r="20" />
+            <circle class="flower-core" cx="924" cy="436" r="15" />
+          </g>
+
+          <g class="butterfly">
+            <ellipse cx="258" cy="266" rx="28" ry="18" />
+            <ellipse cx="308" cy="266" rx="28" ry="18" />
+            <ellipse cx="268" cy="302" rx="21" ry="14" />
+            <ellipse cx="298" cy="302" rx="21" ry="14" />
+            <line x1="283" y1="262" x2="283" y2="318" />
+          </g>
+
+          <g class="bee">
+            <ellipse cx="978" cy="326" rx="32" ry="20" />
+            <path d="M958 310 V342 M976 307 V345 M994 312 V340" />
+            <circle cx="1008" cy="320" r="6" />
+            <ellipse class="wing" cx="970" cy="298" rx="15" ry="10" />
+            <ellipse class="wing" cx="992" cy="298" rx="15" ry="10" />
+          </g>
+
+          <g class="pond">
+            <path d="M840 614 C908 576, 1014 574, 1090 616 C1018 670, 910 670, 840 614Z" />
+            <path d="M872 614 C922 594, 1008 594, 1058 616" />
+          </g>
+          <g class="fish">
+            <ellipse cx="970" cy="624" rx="27" ry="14" />
+            <path d="M942 624 l-25 -17 v34z" />
+            <circle cx="982" cy="620" r="3" />
+          </g>
+
+          <g class="ladybug">
+            <ellipse cx="224" cy="612" rx="30" ry="25" />
+            <path d="M224 590 v44" />
+            <circle cx="210" cy="604" r="5" />
+            <circle cx="236" cy="604" r="5" />
+            <circle cx="214" cy="624" r="5" />
+            <circle cx="238" cy="624" r="5" />
+          </g>
+        </svg>
+      </div>
+      <section class="play-area" id="playArea">
+        <header class="top-bar">
+          <div class="team-badge" aria-label="因数小队角色">
+            <figure class="avatar avatar-leader">
+              <img src="./姐姐.png" alt="姐姐队长">
+            </figure>
+            <figure class="avatar avatar-helper">
+              <img src="./妹妹.png" alt="星星管理员">
+            </figure>
+            <div>
+              <p class="eyebrow">因数小队</p>
+              <h1>乘法挑战</h1>
+            </div>
+          </div>
+
+          <div class="status-strip" aria-label="练习进度">
+            <div>
+              <span class="status-label">题目</span>
+              <strong id="roundText">第 1 题 / 10</strong>
+            </div>
+            <div>
+              <span class="status-label">星星</span>
+              <strong id="starText">0</strong>
+            </div>
+            <div>
+              <span class="status-label">正确</span>
+              <strong id="scoreText">0</strong>
+            </div>
+          </div>
+        </header>
+
+        <div class="progress-track" aria-hidden="true">
+          <span id="progressFill"></span>
+        </div>
+
+        <div class="sticker-strip" aria-hidden="true">
+          <svg class="sticker sticker-flower" viewBox="0 0 64 64" focusable="false">
+            <circle cx="32" cy="14" r="10" />
+            <circle cx="48" cy="30" r="10" />
+            <circle cx="32" cy="46" r="10" />
+            <circle cx="16" cy="30" r="10" />
+            <circle class="sticker-core" cx="32" cy="30" r="10" />
+          </svg>
+          <svg class="sticker sticker-bird" viewBox="0 0 64 64" focusable="false">
+            <path d="M10 34c9-14 23-16 34-6 5-6 10-9 16-9-3 8-7 14-13 18-7 5-17 5-27 1l-10 7z" />
+            <circle cx="44" cy="26" r="3" />
+            <path class="sticker-line" d="M27 38c7 6 15 7 23 2" />
+          </svg>
+          <svg class="sticker sticker-butterfly" viewBox="0 0 64 64" focusable="false">
+            <ellipse cx="21" cy="24" rx="15" ry="12" />
+            <ellipse cx="43" cy="24" rx="15" ry="12" />
+            <ellipse cx="23" cy="42" rx="12" ry="9" />
+            <ellipse cx="41" cy="42" rx="12" ry="9" />
+            <path class="sticker-line" d="M32 18v34" />
+          </svg>
+          <svg class="sticker sticker-fish" viewBox="0 0 64 64" focusable="false">
+            <ellipse cx="36" cy="32" rx="19" ry="12" />
+            <path d="M18 32 5 22v20z" />
+            <circle cx="44" cy="29" r="3" />
+            <path class="sticker-line" d="M30 24c5 5 5 11 0 16" />
+          </svg>
+          <svg class="sticker sticker-bee" viewBox="0 0 64 64" focusable="false">
+            <ellipse cx="34" cy="34" rx="20" ry="13" />
+            <path class="sticker-line" d="M24 22v24M34 21v26M44 24v20" />
+            <ellipse class="sticker-wing" cx="26" cy="20" rx="10" ry="7" />
+            <ellipse class="sticker-wing" cx="43" cy="20" rx="10" ry="7" />
+            <circle cx="51" cy="31" r="3" />
+          </svg>
+          <svg class="sticker sticker-bug" viewBox="0 0 64 64" focusable="false">
+            <ellipse cx="32" cy="35" rx="18" ry="20" />
+            <path class="sticker-line" d="M32 17v36" />
+            <circle cx="25" cy="29" r="4" />
+            <circle cx="39" cy="29" r="4" />
+            <circle cx="24" cy="43" r="4" />
+            <circle cx="40" cy="43" r="4" />
+          </svg>
+        </div>
+
+        <section class="challenge-zone" aria-labelledby="targetLabel">
+          <div class="target-panel">
+            <span class="corner-flower corner-flower-one" aria-hidden="true"></span>
+            <span class="corner-flower corner-flower-two" aria-hidden="true"></span>
+            <p id="targetLabel">目标数字</p>
+            <strong id="targetNumber">36</strong>
+          </div>
+
+          <div class="companion-panel">
+            <img src="./妹妹.png" alt="" aria-hidden="true">
+            <div>
+              <p class="companion-role">星星管理员</p>
+              <p id="feedbackText" aria-live="polite">找出所有正确卡片。</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="cards-zone" aria-label="乘法卡片">
+          <div class="factor-grid" id="cardGrid"></div>
+        </section>
+
+        <footer class="action-bar">
+          <button class="ghost-button" type="button" id="restartButton">重新开始</button>
+          <button class="primary-button" type="button" id="submitButton">提交答案</button>
+          <button class="primary-button hidden" type="button" id="nextButton">下一题</button>
+        </footer>
+      </section>
+
+      <section class="result-screen hidden" id="resultScreen" aria-labelledby="resultTitle">
+        <div class="result-garland" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="celebration">
+          <img src="./姐姐.png" alt="姐姐队长">
+          <img src="./妹妹.png" alt="星星管理员">
+        </div>
+        <p class="eyebrow">本轮完成</p>
+        <h2 id="resultTitle">10 题练习结束</h2>
+        <p class="result-score" id="resultScore">正确 0 题，正确率 0%</p>
+        <p class="result-detail" id="resultDetail">继续练习会优先复习错题数字。</p>
+        <div class="wrong-list" id="wrongList" aria-label="本轮错题数字"></div>
+        <div class="result-actions">
+          <button class="primary-button" type="button" id="againButton">再练 10 题</button>
+        </div>
+      </section>
+    </main>
+
+    <script src="./app.js?v=3" defer></script>
+  </body>
+</html>

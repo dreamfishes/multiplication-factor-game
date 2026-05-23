@@ -1,0 +1,19 @@
+{
+  "name": "因数小队乘法挑战",
+  "short_name": "因数小队",
+  "description": "面向小学三年级的乘法因数反应练习。",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#fff1fb",
+  "theme_color": "#ff6fb1",
+  "icons": [
+    {
+      "src": "./app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
