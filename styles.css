@@ -239,9 +239,9 @@ button:focus-visible {
 }
 
 .top-bar {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(260px, auto) minmax(170px, 1fr) minmax(330px, 444px);
   align-items: center;
-  justify-content: space-between;
   gap: 16px;
 }
 
@@ -249,6 +249,7 @@ button:focus-visible {
   display: flex;
   align-items: center;
   gap: 12px;
+  justify-self: start;
   min-width: 0;
   padding: 8px 14px;
   border: 3px solid rgba(255, 255, 255, 0.86);
@@ -306,9 +307,70 @@ h2 {
   font-size: 2.1rem;
 }
 
+.timer-panel {
+  position: relative;
+  justify-self: center;
+  width: min(260px, 100%);
+  min-height: 72px;
+  padding: 10px 16px 10px 70px;
+  border-radius: 8px;
+  border: 3px solid rgba(255, 111, 177, 0.34);
+  background:
+    radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.9) 0 19px, transparent 20px),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(255, 242, 252, 0.94), rgba(230, 255, 241, 0.9));
+  box-shadow: var(--small-shadow);
+  overflow: hidden;
+}
+
+.timer-panel::before {
+  content: "";
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  width: 38px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 5px solid var(--pink);
+  background:
+    linear-gradient(90deg, transparent 47%, #7a2487 48% 52%, transparent 53%),
+    linear-gradient(0deg, transparent 47%, #7a2487 48% 52%, transparent 53%),
+    #fff;
+  transform: translateY(-50%);
+  box-shadow: 0 4px 0 rgba(57, 34, 65, 0.13);
+}
+
+.timer-panel::after {
+  content: "";
+  position: absolute;
+  left: 32px;
+  top: 11px;
+  width: 14px;
+  height: 8px;
+  border-radius: 5px 5px 2px 2px;
+  background: var(--lemon);
+  border: 3px solid var(--pink);
+}
+
+.timer-label {
+  display: block;
+  color: #7a2487;
+  font-size: 0.92rem;
+  font-weight: 900;
+}
+
+.timer-panel strong {
+  display: block;
+  margin-top: 2px;
+  font-family: "Arial Rounded MT Bold", "Marker Felt", "Yuanti SC", sans-serif;
+  font-size: 1.72rem;
+  line-height: 1;
+  color: var(--ink);
+}
+
 .status-strip {
   display: grid;
   grid-template-columns: repeat(3, minmax(86px, 1fr));
+  justify-self: end;
   gap: 10px;
   width: min(444px, 100%);
 }
@@ -684,6 +746,19 @@ h2 {
   font-weight: 900;
 }
 
+.result-time {
+  margin: 8px auto 0;
+  width: fit-content;
+  padding: 8px 16px;
+  border-radius: 8px;
+  color: #7a2487;
+  background: linear-gradient(135deg, #fff6cc, #ffe0ec);
+  border: 3px solid rgba(255, 255, 255, 0.9);
+  box-shadow: var(--small-shadow);
+  font-size: 1.2rem;
+  font-weight: 900;
+}
+
 .result-detail {
   margin: 8px auto 0;
   max-width: 620px;
@@ -793,11 +868,10 @@ h2 {
     grid-template-columns: 1fr;
   }
 
-  .top-bar {
-    display: grid;
-  }
-
+  .timer-panel,
+  .team-badge,
   .status-strip {
+    justify-self: stretch;
     width: 100%;
   }
 
@@ -830,6 +904,11 @@ h2 {
 @media (max-width: 520px) {
   .status-strip {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .timer-panel {
+    min-height: 64px;
+    padding-left: 64px;
   }
 
   .status-strip > div:first-child {

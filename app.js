@@ -13,6 +13,7 @@ const els = {
   starText: document.querySelector("#starText"),
   scoreText: document.querySelector("#scoreText"),
   progressFill: document.querySelector("#progressFill"),
+  timerText: document.querySelector("#timerText"),
   targetNumber: document.querySelector("#targetNumber"),
   feedbackText: document.querySelector("#feedbackText"),
   cardGrid: document.querySelector("#cardGrid"),
@@ -21,6 +22,7 @@ const els = {
   restartButton: document.querySelector("#restartButton"),
   againButton: document.querySelector("#againButton"),
   resultScore: document.querySelector("#resultScore"),
+  resultTime: document.querySelector("#resultTime"),
   resultDetail: document.querySelector("#resultDetail"),
   wrongList: document.querySelector("#wrongList"),
 };
@@ -29,6 +31,7 @@ const allEquations = buildEquations();
 const targetPool = buildTargetPool();
 
 let state = createInitialState();
+let timerInterval = null;
 
 function buildEquations() {
   const equations = [];
@@ -71,8 +74,11 @@ function createInitialState() {
     retryQueue: [...(stats.lastWrongTargets || [])],
     missedTargets: [],
     submitted: false,
+    lastAnswerCorrect: null,
     currentQuestion: null,
     previousTarget: null,
+    startTime: null,
+    elapsedMs: 0,
     stats,
   };
 }
@@ -138,6 +144,10 @@ function chooseTarget() {
 
 function createQuestion() {
   const target = chooseTarget();
+  return createQuestionForTarget(target);
+}
+
+function createQuestionForTarget(target) {
   const correctCards = allEquations.filter((equation) => equation.product === target);
   const correctIds = new Set(correctCards.map((equation) => equation.id));
   const distractorCount = Math.max(CONFIG.cardCount - correctCards.length, 0);
@@ -169,16 +179,29 @@ function pickDistractors(target, correctIds, count) {
 }
 
 function startSession() {
+  stopTimer();
   state = createInitialState();
   els.resultScreen.classList.add("hidden");
   els.playArea.classList.remove("hidden");
+  startTimer();
   nextQuestion();
 }
 
 function nextQuestion() {
   state.selectedIds = new Set();
   state.submitted = false;
+  state.lastAnswerCorrect = null;
   state.currentQuestion = createQuestion();
+  render();
+}
+
+function retryCurrentQuestion() {
+  const target = state.currentQuestion.target;
+
+  state.selectedIds = new Set();
+  state.submitted = false;
+  state.lastAnswerCorrect = null;
+  state.currentQuestion = createQuestionForTarget(target);
   render();
 }
 
@@ -199,13 +222,13 @@ function submitAnswer() {
   const isCorrect = hasAllCorrect && hasOnlyCorrect;
 
   state.submitted = true;
-  state.answeredCount += 1;
+  state.lastAnswerCorrect = isCorrect;
 
   if (isCorrect) {
+    state.answeredCount += 1;
     state.score += 1;
     state.stars += 1;
   } else {
-    state.retryQueue.push(state.currentQuestion.target);
     state.missedTargets.push(state.currentQuestion.target);
   }
 
@@ -213,6 +236,15 @@ function submitAnswer() {
 }
 
 function moveForward() {
+  if (!state.submitted) {
+    return;
+  }
+
+  if (state.lastAnswerCorrect === false) {
+    retryCurrentQuestion();
+    return;
+  }
+
   if (state.answeredCount >= CONFIG.totalRounds) {
     finishSession();
     return;
@@ -222,8 +254,7 @@ function moveForward() {
 }
 
 function finishSession() {
-  const accuracy = Math.round((state.score / CONFIG.totalRounds) * 100);
-  const remainingWrongTargets = uniqueNumbers(state.retryQueue);
+  stopTimer();
   const visibleWrongTargets = uniqueNumbers(state.missedTargets);
 
   const nextStats = {
@@ -231,7 +262,7 @@ function finishSession() {
     totalQuestions: state.stats.totalQuestions + CONFIG.totalRounds,
     totalCorrect: state.stats.totalCorrect + state.score,
     bestScore: Math.max(state.stats.bestScore, state.score),
-    lastWrongTargets: remainingWrongTargets,
+    lastWrongTargets: visibleWrongTargets,
   };
 
   saveStats(nextStats);
@@ -239,12 +270,13 @@ function finishSession() {
 
   els.playArea.classList.add("hidden");
   els.resultScreen.classList.remove("hidden");
-  els.resultScore.textContent = `正确 ${state.score} 题，正确率 ${accuracy}%`;
+  els.resultScore.textContent = `${CONFIG.totalRounds} 题全部答对`;
+  els.resultTime.textContent = `总用时 ${formatElapsed(state.elapsedMs)}`;
 
   if (visibleWrongTargets.length > 0) {
-    els.resultDetail.textContent = "这些数字会在后续练习中优先出现。";
+    els.resultDetail.textContent = "中途重做过这些数字，已经全部订正。下次练习会优先复习。";
   } else {
-    els.resultDetail.textContent = "本轮没有错题，可以继续保持速度和准确率。";
+    els.resultDetail.textContent = "本轮一次通过，可以继续保持速度和准确率。";
   }
 
   els.wrongList.replaceChildren();
@@ -257,7 +289,8 @@ function finishSession() {
 }
 
 function render(lastAnswerCorrect = null) {
-  const currentRound = Math.min(state.answeredCount + (state.submitted ? 0 : 1), CONFIG.totalRounds);
+  const isCorrectReview = state.submitted && state.lastAnswerCorrect === true;
+  const currentRound = Math.min(state.answeredCount + (isCorrectReview ? 0 : 1), CONFIG.totalRounds);
   const progress = (state.answeredCount / CONFIG.totalRounds) * 100;
 
   els.roundText.textContent = `第 ${currentRound} 题 / ${CONFIG.totalRounds}`;
@@ -266,12 +299,16 @@ function render(lastAnswerCorrect = null) {
   els.progressFill.style.width = `${progress}%`;
   els.targetNumber.textContent = String(state.currentQuestion.target);
 
-  renderFeedback(lastAnswerCorrect);
+  renderFeedback(lastAnswerCorrect ?? state.lastAnswerCorrect);
   renderCards();
 
   els.submitButton.classList.toggle("hidden", state.submitted);
   els.nextButton.classList.toggle("hidden", !state.submitted);
-  els.nextButton.textContent = state.answeredCount >= CONFIG.totalRounds ? "看结果" : "下一题";
+  if (state.lastAnswerCorrect === false) {
+    els.nextButton.textContent = "再做一次";
+  } else {
+    els.nextButton.textContent = state.answeredCount >= CONFIG.totalRounds ? "看结果" : "下一题";
+  }
 }
 
 function renderFeedback(lastAnswerCorrect) {
@@ -281,11 +318,18 @@ function renderFeedback(lastAnswerCorrect) {
   }
 
   if (lastAnswerCorrect) {
-    els.feedbackText.textContent = "答对了，星星已经收好。";
+    els.feedbackText.textContent =
+      state.answeredCount >= CONFIG.totalRounds ? "第 10 题答对了，去看总用时。" : "答对了，星星已经收好。";
     return;
   }
 
-  els.feedbackText.textContent = "差一点。绿色卡片是正确答案，这个数字会再出现。";
+  els.feedbackText.textContent = `差一点。正确答案是：${getCorrectLabels().join("、")}。看清绿色卡片，再做一遍。`;
+}
+
+function getCorrectLabels() {
+  return state.currentQuestion.cards
+    .filter((card) => state.currentQuestion.correctIds.has(card.id))
+    .map((card) => card.label);
 }
 
 function renderCards() {
@@ -332,6 +376,42 @@ function toggleCard(cardId) {
   }
 
   render();
+}
+
+function startTimer() {
+  state.startTime = Date.now();
+  state.elapsedMs = 0;
+  updateTimer();
+  timerInterval = window.setInterval(updateTimer, 1000);
+}
+
+function stopTimer() {
+  if (timerInterval !== null) {
+    window.clearInterval(timerInterval);
+    timerInterval = null;
+  }
+
+  if (state.startTime !== null) {
+    state.elapsedMs = Date.now() - state.startTime;
+  }
+}
+
+function updateTimer() {
+  if (state.startTime === null) {
+    els.timerText.textContent = "00:00";
+    return;
+  }
+
+  state.elapsedMs = Date.now() - state.startTime;
+  els.timerText.textContent = formatElapsed(state.elapsedMs);
+}
+
+function formatElapsed(milliseconds) {
+  const totalSeconds = Math.max(0, Math.floor(milliseconds / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
 
 els.submitButton.addEventListener("click", submitAnswer);

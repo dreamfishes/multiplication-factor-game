@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#136f63">
+    <meta name="theme-color" content="#ff6fb1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="因数小队">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -11,7 +11,7 @@
     <link rel="manifest" href="./manifest.webmanifest">
     <link rel="apple-touch-icon" href="./姐姐.png">
     <link rel="icon" href="./app-icon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="./styles.css?v=3">
+    <link rel="stylesheet" href="./styles.css?v=4">
   </head>
   <body>
     <main class="app-shell" aria-label="因数小队乘法游戏">
@@ -109,6 +109,11 @@
               <p class="eyebrow">因数小队</p>
               <h1>乘法挑战</h1>
             </div>
+          </div>
+
+          <div class="timer-panel" aria-label="本轮计时">
+            <span class="timer-label">本轮用时</span>
+            <strong id="timerText">00:00</strong>
           </div>
 
           <div class="status-strip" aria-label="练习进度">
@@ -213,6 +218,7 @@
         <p class="eyebrow">本轮完成</p>
         <h2 id="resultTitle">10 题练习结束</h2>
         <p class="result-score" id="resultScore">正确 0 题，正确率 0%</p>
+        <p class="result-time" id="resultTime">总用时 00:00</p>
         <p class="result-detail" id="resultDetail">继续练习会优先复习错题数字。</p>
         <div class="wrong-list" id="wrongList" aria-label="本轮错题数字"></div>
         <div class="result-actions">
@@ -221,6 +227,6 @@
       </section>
     </main>
 
-    <script src="./app.js?v=3" defer></script>
+    <script src="./app.js?v=4" defer></script>
   </body>
 </html>
