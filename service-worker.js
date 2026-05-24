@@ -1,8 +1,8 @@
-const CACHE_NAME = "factor-squad-20260524-v14";
+const CACHE_NAME = "factor-squad-20260524-v15";
 const ASSETS = [
   "./",
   "./index.html",
-  "./styles.css?v=10",
+  "./styles.css?v=11",
   "./app.js?v=11",
   "./manifest.webmanifest",
   "./app-icon.svg",
