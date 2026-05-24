@@ -3,6 +3,7 @@ const CONFIG = {
   cardCount: 8,
   minFactor: 1,
   maxFactor: 9,
+  challengeTimeMs: 120000,
   statsKey: "factor-squad-stats-v1",
   musicKey: "factor-squad-music-enabled-v1",
 };
@@ -18,16 +19,22 @@ const els = {
   targetNumber: document.querySelector("#targetNumber"),
   feedbackText: document.querySelector("#feedbackText"),
   cardGrid: document.querySelector("#cardGrid"),
+  rescueMeter: document.querySelector("#rescueMeter"),
+  rescueTime: document.querySelector("#rescueTime"),
+  rescueStatus: document.querySelector("#rescueStatus"),
   musicButton: document.querySelector("#musicButton"),
   bgmAudio: document.querySelector("#bgmAudio"),
   submitButton: document.querySelector("#submitButton"),
   nextButton: document.querySelector("#nextButton"),
   restartButton: document.querySelector("#restartButton"),
   againButton: document.querySelector("#againButton"),
+  resultEyebrow: document.querySelector("#resultEyebrow"),
+  resultTitle: document.querySelector("#resultTitle"),
   resultScore: document.querySelector("#resultScore"),
   resultTime: document.querySelector("#resultTime"),
   resultDetail: document.querySelector("#resultDetail"),
   wrongList: document.querySelector("#wrongList"),
+  sisterCheer: document.querySelector("#sisterCheer"),
   fireworksLayer: document.querySelector("#fireworksLayer"),
 };
 
@@ -97,6 +104,8 @@ function createInitialState() {
     previousTarget: null,
     startTime: null,
     elapsedMs: 0,
+    remainingMs: CONFIG.challengeTimeMs,
+    finished: false,
     stats,
   };
 }
@@ -219,6 +228,7 @@ function startSession() {
   state = createInitialState();
   els.resultScreen.classList.add("hidden");
   els.resultScreen.classList.remove("is-celebrating");
+  els.resultScreen.classList.remove("is-timeout");
   els.playArea.classList.remove("hidden");
   startTimer();
   nextQuestion();
@@ -245,7 +255,7 @@ function retryCurrentQuestion() {
 }
 
 function submitAnswer() {
-  if (state.submitted) {
+  if (state.submitted || state.finished) {
     return;
   }
 
@@ -271,6 +281,9 @@ function submitAnswer() {
     state.score += 1;
     state.stars += 1;
     playCorrectSound();
+    if (state.answeredCount >= CONFIG.totalRounds) {
+      stopTimer();
+    }
   } else {
     state.missedTargets.push(state.currentQuestion.target);
     playWrongSound();
@@ -287,7 +300,7 @@ function submitAnswer() {
 function moveForward() {
   clearAutoAdvanceTimer();
 
-  if (!state.submitted) {
+  if (!state.submitted || state.finished) {
     return;
   }
 
@@ -304,13 +317,25 @@ function moveForward() {
   nextQuestion();
 }
 
-function finishSession() {
+function timeoutSession() {
+  if (state.finished || state.answeredCount >= CONFIG.totalRounds) {
+    return;
+  }
+
+  state.remainingMs = 0;
+  finishSession("timeout");
+}
+
+function finishSession(outcome = "success") {
+  state.finished = true;
   stopTimer();
-  const visibleWrongTargets = uniqueNumbers(state.missedTargets);
+  const timedOut = outcome === "timeout";
+  const timedOutTarget = timedOut && state.currentQuestion ? [state.currentQuestion.target] : [];
+  const visibleWrongTargets = uniqueNumbers([...state.missedTargets, ...timedOutTarget]);
 
   const nextStats = {
     sessions: state.stats.sessions + 1,
-    totalQuestions: state.stats.totalQuestions + CONFIG.totalRounds,
+    totalQuestions: state.stats.totalQuestions + (timedOut ? state.answeredCount : CONFIG.totalRounds),
     totalCorrect: state.stats.totalCorrect + state.score,
     bestScore: Math.max(state.stats.bestScore, state.score),
     lastWrongTargets: visibleWrongTargets,
@@ -321,15 +346,30 @@ function finishSession() {
 
   els.playArea.classList.add("hidden");
   els.resultScreen.classList.remove("hidden");
-  els.resultScreen.classList.add("is-celebrating");
-  els.resultScore.textContent = `${CONFIG.totalRounds} 题全部答对`;
-  els.resultTime.textContent = `总用时 ${formatElapsed(state.elapsedMs)}`;
+  els.resultScreen.classList.toggle("is-celebrating", !timedOut);
+  els.resultScreen.classList.toggle("is-timeout", timedOut);
 
-  if (visibleWrongTargets.length > 0) {
-    els.resultDetail.textContent = "中途重做过这些数字，已经全部订正。下次练习会优先复习。";
+  if (timedOut) {
+    els.resultEyebrow.textContent = "本轮暂停";
+    els.resultTitle.textContent = "差一点就成功了！";
+    els.resultScore.textContent = `完成 ${state.score} / ${CONFIG.totalRounds} 题`;
+    els.resultTime.textContent = "2 分钟到";
+    els.resultDetail.textContent = "公主已经躲进城堡，恐龙停在门口。再挑战一次，姐姐一定能赢。";
+    els.sisterCheer.textContent = "姐姐再试一次！";
   } else {
-    els.resultDetail.textContent = "本轮一次通过，可以继续保持速度和准确率。";
+    els.resultEyebrow.textContent = "营救成功";
+    els.resultTitle.textContent = "营救成功！";
+    els.resultScore.textContent = `${CONFIG.totalRounds} 题全部答对`;
+    els.resultTime.textContent = `用时 ${formatElapsed(state.elapsedMs)}，剩余 ${formatElapsed(state.remainingMs)}`;
+    els.sisterCheer.textContent = "姐姐真棒！";
+
+    if (visibleWrongTargets.length > 0) {
+      els.resultDetail.textContent = "中途重做过这些数字，已经全部订正。下次练习会优先复习。";
+    } else {
+      els.resultDetail.textContent = "你在恐龙追上公主前完成了挑战，可以继续保持速度和准确率。";
+    }
   }
+
 
   els.wrongList.replaceChildren();
   visibleWrongTargets.forEach((target) => {
@@ -339,8 +379,51 @@ function finishSession() {
     els.wrongList.append(chip);
   });
 
-  playFinaleSound();
-  launchFinaleFireworks();
+  if (timedOut) {
+    playWrongSound();
+  } else {
+    playFinaleSound();
+    launchFinaleFireworks();
+  }
+}
+
+function renderRescueMeter() {
+  const elapsed = Math.min(state.elapsedMs, CONFIG.challengeTimeMs);
+  const remaining = Math.max(CONFIG.challengeTimeMs - elapsed, 0);
+  const timeProgress = Math.min(elapsed / CONFIG.challengeTimeMs, 1);
+
+  state.remainingMs = remaining;
+  els.timerText.textContent = formatElapsed(remaining);
+  els.rescueTime.textContent = formatElapsed(remaining);
+  els.rescueStatus.textContent = getRescueStatus(remaining);
+  els.rescueMeter.style.setProperty("--rescue-progress", timeProgress.toFixed(4));
+  els.rescueMeter.classList.toggle("is-warning", remaining <= 30000 && remaining > 10000);
+  els.rescueMeter.classList.toggle("is-danger", remaining <= 10000);
+  els.rescueMeter.classList.toggle("is-safe", remaining > 30000);
+}
+
+function getRescueStatus(remaining) {
+  if (state.finished && state.answeredCount >= CONFIG.totalRounds) {
+    return "公主安全啦";
+  }
+
+  if (remaining <= 0) {
+    return "公主进城堡啦";
+  }
+
+  if (remaining <= 10000) {
+    return "最后冲刺";
+  }
+
+  if (remaining <= 30000) {
+    return "恐龙快到啦";
+  }
+
+  if (remaining <= 60000) {
+    return "加油加速";
+  }
+
+  return "恐龙刚出发";
 }
 
 function render(lastAnswerCorrect = null) {
@@ -354,6 +437,7 @@ function render(lastAnswerCorrect = null) {
   els.scoreText.textContent = String(state.score);
   els.progressFill.style.width = `${progress}%`;
   els.targetNumber.textContent = String(state.currentQuestion.target);
+  renderRescueMeter();
 
   renderFeedback(lastAnswerCorrect ?? state.lastAnswerCorrect);
   renderCards();
@@ -709,6 +793,7 @@ function createFireworkBurst({ x, y, particleCount, distance, duration, size }) 
 function startTimer() {
   state.startTime = Date.now();
   state.elapsedMs = 0;
+  state.remainingMs = CONFIG.challengeTimeMs;
   updateTimer();
   timerInterval = window.setInterval(updateTimer, 1000);
 }
@@ -720,18 +805,27 @@ function stopTimer() {
   }
 
   if (state.startTime !== null) {
-    state.elapsedMs = Date.now() - state.startTime;
+    state.elapsedMs = Math.min(Date.now() - state.startTime, CONFIG.challengeTimeMs);
+    state.remainingMs = Math.max(CONFIG.challengeTimeMs - state.elapsedMs, 0);
+    state.startTime = null;
   }
+
+  renderRescueMeter();
 }
 
 function updateTimer() {
   if (state.startTime === null) {
-    els.timerText.textContent = "00:00";
+    renderRescueMeter();
     return;
   }
 
-  state.elapsedMs = Date.now() - state.startTime;
-  els.timerText.textContent = formatElapsed(state.elapsedMs);
+  state.elapsedMs = Math.min(Date.now() - state.startTime, CONFIG.challengeTimeMs);
+  state.remainingMs = Math.max(CONFIG.challengeTimeMs - state.elapsedMs, 0);
+  renderRescueMeter();
+
+  if (state.remainingMs <= 0) {
+    timeoutSession();
+  }
 }
 
 function formatElapsed(milliseconds) {

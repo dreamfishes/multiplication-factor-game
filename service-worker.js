@@ -1,9 +1,9 @@
-const CACHE_NAME = "factor-squad-20260524-v13";
+const CACHE_NAME = "factor-squad-20260524-v14";
 const ASSETS = [
   "./",
   "./index.html",
-  "./styles.css?v=9",
-  "./app.js?v=10",
+  "./styles.css?v=10",
+  "./app.js?v=11",
   "./manifest.webmanifest",
   "./app-icon.svg",
   "./bgm.mp3",
@@ -14,6 +14,8 @@ const ASSETS = [
   "./最后结算庆祝.mp3",
   "./姐姐.png",
   "./妹妹.png",
+  "./dinosaur.png",
+  "./princess.png",
 ];
 
 self.addEventListener("install", (event) => {

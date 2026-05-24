@@ -11,7 +11,7 @@
     <link rel="manifest" href="./manifest.webmanifest">
     <link rel="apple-touch-icon" href="./姐姐.png">
     <link rel="icon" href="./app-icon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="./styles.css?v=9">
+    <link rel="stylesheet" href="./styles.css?v=10">
   </head>
   <body>
     <main class="app-shell" aria-label="因数小队乘法游戏">
@@ -113,7 +113,7 @@
           </div>
 
           <div class="timer-panel" aria-label="本轮计时">
-            <span class="timer-label">本轮用时</span>
+            <span class="timer-label">剩余时间</span>
             <strong id="timerText">00:00</strong>
           </div>
 
@@ -158,6 +158,24 @@
           <div class="factor-grid" id="cardGrid"></div>
         </section>
 
+        <section class="rescue-meter" id="rescueMeter" aria-label="两分钟营救倒计时">
+          <div class="rescue-meter-head">
+            <span>营救倒计时</span>
+            <strong id="rescueTime">02:00</strong>
+            <em id="rescueStatus">恐龙刚出发</em>
+          </div>
+          <div class="rescue-stage">
+            <div class="rescue-track" id="rescueTrack">
+              <span class="rescue-path" aria-hidden="true"></span>
+              <img class="rescue-dinosaur" id="rescueDinosaur" src="./dinosaur.png" alt="可爱恐龙">
+              <div class="castle-gate" aria-hidden="true">
+                <span></span>
+              </div>
+              <img class="rescue-princess" src="./princess.png" alt="公主">
+            </div>
+          </div>
+        </section>
+
         <footer class="action-bar">
           <button class="ghost-button music-button" type="button" id="musicButton" aria-pressed="true">音乐：开</button>
           <button class="ghost-button" type="button" id="restartButton">重新开始</button>
@@ -170,12 +188,19 @@
         <div class="result-garland" aria-hidden="true">
           <span></span><span></span><span></span><span></span><span></span>
         </div>
+        <div class="rescue-result-scene" id="resultRescueScene" aria-hidden="true">
+          <img class="result-dinosaur" src="./dinosaur.png" alt="">
+          <div class="result-castle">
+            <span></span>
+          </div>
+          <img class="result-princess" src="./princess.png" alt="">
+        </div>
         <div class="celebration">
           <img src="./姐姐.png" alt="姐姐队长">
           <img src="./妹妹.png" alt="星星管理员">
-          <div class="sister-cheer" aria-label="妹妹说姐姐真棒">姐姐真棒！</div>
+          <div class="sister-cheer" id="sisterCheer" aria-label="妹妹鼓励姐姐">姐姐真棒！</div>
         </div>
-        <p class="eyebrow">本轮完成</p>
+        <p class="eyebrow" id="resultEyebrow">本轮完成</p>
         <h2 id="resultTitle">10 题练习结束</h2>
         <p class="result-score" id="resultScore">正确 0 题，正确率 0%</p>
         <p class="result-time" id="resultTime">总用时 00:00</p>
@@ -188,6 +213,6 @@
     </main>
 
     <audio id="bgmAudio" src="./bgm.mp3" loop preload="auto"></audio>
-    <script src="./app.js?v=10" defer></script>
+    <script src="./app.js?v=11" defer></script>
   </body>
 </html>
