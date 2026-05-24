@@ -1,11 +1,17 @@
-const CACHE_NAME = "factor-squad-20260523-v6";
+const CACHE_NAME = "factor-squad-20260524-v13";
 const ASSETS = [
   "./",
   "./index.html",
-  "./styles.css?v=5",
-  "./app.js?v=4",
+  "./styles.css?v=9",
+  "./app.js?v=10",
   "./manifest.webmanifest",
   "./app-icon.svg",
+  "./bgm.mp3",
+  "./点击答案音效.mp3",
+  "./没有选择就提交.mp3",
+  "./答对音效.mp3",
+  "./答错音效.mp3",
+  "./最后结算庆祝.mp3",
   "./姐姐.png",
   "./妹妹.png",
 ];

@@ -4,6 +4,7 @@ const CONFIG = {
   minFactor: 1,
   maxFactor: 9,
   statsKey: "factor-squad-stats-v1",
+  musicKey: "factor-squad-music-enabled-v1",
 };
 
 const els = {
@@ -17,6 +18,8 @@ const els = {
   targetNumber: document.querySelector("#targetNumber"),
   feedbackText: document.querySelector("#feedbackText"),
   cardGrid: document.querySelector("#cardGrid"),
+  musicButton: document.querySelector("#musicButton"),
+  bgmAudio: document.querySelector("#bgmAudio"),
   submitButton: document.querySelector("#submitButton"),
   nextButton: document.querySelector("#nextButton"),
   restartButton: document.querySelector("#restartButton"),
@@ -25,13 +28,28 @@ const els = {
   resultTime: document.querySelector("#resultTime"),
   resultDetail: document.querySelector("#resultDetail"),
   wrongList: document.querySelector("#wrongList"),
+  fireworksLayer: document.querySelector("#fireworksLayer"),
 };
 
 const allEquations = buildEquations();
 const targetPool = buildTargetPool();
+const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const SOUND_VOLUME_BOOST = 1.45;
+const BGM_VOLUME = 0.5;
+const SOUND_ASSETS = {
+  card: { src: "./点击答案音效.mp3", volume: 1 },
+  notice: { src: "./没有选择就提交.mp3", volume: 1 },
+  correct: { src: "./答对音效.mp3", volume: 1 },
+  wrong: { src: "./答错音效.mp3", volume: 1 },
+  finale: { src: "./最后结算庆祝.mp3", volume: 1 },
+};
 
 let state = createInitialState();
 let timerInterval = null;
+let audioContext = null;
+let autoAdvanceTimer = null;
+let musicEnabled = loadMusicPreference();
+const soundPlayers = new Map();
 
 function buildEquations() {
   const equations = [];
@@ -117,6 +135,23 @@ function saveStats(nextStats) {
   }
 }
 
+function loadMusicPreference() {
+  try {
+    const stored = window.localStorage.getItem(CONFIG.musicKey);
+    return stored === null ? true : stored === "true";
+  } catch {
+    return true;
+  }
+}
+
+function saveMusicPreference() {
+  try {
+    window.localStorage.setItem(CONFIG.musicKey, String(musicEnabled));
+  } catch {
+    // Music should still work even if preference storage is unavailable.
+  }
+}
+
 function shuffle(items) {
   const shuffled = [...items];
 
@@ -179,15 +214,18 @@ function pickDistractors(target, correctIds, count) {
 }
 
 function startSession() {
+  clearAutoAdvanceTimer();
   stopTimer();
   state = createInitialState();
   els.resultScreen.classList.add("hidden");
+  els.resultScreen.classList.remove("is-celebrating");
   els.playArea.classList.remove("hidden");
   startTimer();
   nextQuestion();
 }
 
 function nextQuestion() {
+  clearAutoAdvanceTimer();
   state.selectedIds = new Set();
   state.submitted = false;
   state.lastAnswerCorrect = null;
@@ -196,6 +234,7 @@ function nextQuestion() {
 }
 
 function retryCurrentQuestion() {
+  clearAutoAdvanceTimer();
   const target = state.currentQuestion.target;
 
   state.selectedIds = new Set();
@@ -210,7 +249,10 @@ function submitAnswer() {
     return;
   }
 
+  ensureBackgroundMusic();
+
   if (state.selectedIds.size === 0) {
+    playNoticeSound();
     els.feedbackText.textContent = "先选出等于目标数字的卡片。";
     return;
   }
@@ -228,14 +270,23 @@ function submitAnswer() {
     state.answeredCount += 1;
     state.score += 1;
     state.stars += 1;
+    playCorrectSound();
   } else {
     state.missedTargets.push(state.currentQuestion.target);
+    playWrongSound();
   }
 
   render(isCorrect);
+
+  if (isCorrect) {
+    launchSmallFirework();
+    scheduleAutoAdvance();
+  }
 }
 
 function moveForward() {
+  clearAutoAdvanceTimer();
+
   if (!state.submitted) {
     return;
   }
@@ -270,6 +321,7 @@ function finishSession() {
 
   els.playArea.classList.add("hidden");
   els.resultScreen.classList.remove("hidden");
+  els.resultScreen.classList.add("is-celebrating");
   els.resultScore.textContent = `${CONFIG.totalRounds} 题全部答对`;
   els.resultTime.textContent = `总用时 ${formatElapsed(state.elapsedMs)}`;
 
@@ -286,12 +338,16 @@ function finishSession() {
     chip.textContent = String(target);
     els.wrongList.append(chip);
   });
+
+  playFinaleSound();
+  launchFinaleFireworks();
 }
 
 function render(lastAnswerCorrect = null) {
   const isCorrectReview = state.submitted && state.lastAnswerCorrect === true;
   const currentRound = Math.min(state.answeredCount + (isCorrectReview ? 0 : 1), CONFIG.totalRounds);
   const progress = (state.answeredCount / CONFIG.totalRounds) * 100;
+  const shouldHideNextButton = !state.submitted || state.lastAnswerCorrect === true;
 
   els.roundText.textContent = `第 ${currentRound} 题 / ${CONFIG.totalRounds}`;
   els.starText.textContent = String(state.stars);
@@ -303,7 +359,7 @@ function render(lastAnswerCorrect = null) {
   renderCards();
 
   els.submitButton.classList.toggle("hidden", state.submitted);
-  els.nextButton.classList.toggle("hidden", !state.submitted);
+  els.nextButton.classList.toggle("hidden", shouldHideNextButton);
   if (state.lastAnswerCorrect === false) {
     els.nextButton.textContent = "再做一次";
   } else {
@@ -319,7 +375,7 @@ function renderFeedback(lastAnswerCorrect) {
 
   if (lastAnswerCorrect) {
     els.feedbackText.textContent =
-      state.answeredCount >= CONFIG.totalRounds ? "第 10 题答对了，去看总用时。" : "答对了，星星已经收好。";
+      state.answeredCount >= CONFIG.totalRounds ? "第 10 题答对了，马上看结果。" : "答对了，马上进入下一题。";
     return;
   }
 
@@ -369,13 +425,285 @@ function toggleCard(cardId) {
     return;
   }
 
+  ensureBackgroundMusic();
+
   if (state.selectedIds.has(cardId)) {
     state.selectedIds.delete(cardId);
+    playCardSound(false);
   } else {
     state.selectedIds.add(cardId);
+    playCardSound(true);
   }
 
   render();
+}
+
+function getAudioContext() {
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+
+  if (!AudioContextClass) {
+    return null;
+  }
+
+  if (audioContext === null) {
+    audioContext = new AudioContextClass();
+  }
+
+  if (audioContext.state === "suspended") {
+    audioContext.resume().catch(() => {});
+  }
+
+  return audioContext;
+}
+
+function playTone({ frequency, duration = 0.12, delay = 0, type = "sine", volume = 0.08 }) {
+  const context = getAudioContext();
+
+  if (context === null) {
+    return;
+  }
+
+  const startAt = context.currentTime + delay;
+  const oscillator = context.createOscillator();
+  const gain = context.createGain();
+
+  oscillator.type = type;
+  oscillator.frequency.setValueAtTime(frequency, startAt);
+  gain.gain.setValueAtTime(0.0001, startAt);
+  const boostedVolume = Math.min(volume * SOUND_VOLUME_BOOST, 0.34);
+
+  gain.gain.exponentialRampToValueAtTime(boostedVolume, startAt + 0.018);
+  gain.gain.exponentialRampToValueAtTime(0.0001, startAt + duration);
+
+  oscillator.connect(gain);
+  gain.connect(context.destination);
+  oscillator.start(startAt);
+  oscillator.stop(startAt + duration + 0.02);
+}
+
+function getSoundPlayer(name) {
+  if (soundPlayers.has(name)) {
+    return soundPlayers.get(name);
+  }
+
+  const asset = SOUND_ASSETS[name];
+
+  if (!asset) {
+    return null;
+  }
+
+  const audio = new Audio(asset.src);
+  audio.preload = "auto";
+  audio.volume = asset.volume;
+  soundPlayers.set(name, audio);
+  return audio;
+}
+
+function playAudioAsset(name, fallback) {
+  const audio = getSoundPlayer(name);
+
+  if (audio === null) {
+    fallback();
+    return;
+  }
+
+  audio.pause();
+  audio.currentTime = 0;
+  audio.play().catch(() => {
+    fallback();
+  });
+}
+
+function playCardTone(isSelected) {
+  playTone({
+    frequency: isSelected ? 660 : 440,
+    duration: 0.08,
+    type: "triangle",
+    volume: 0.12,
+  });
+}
+
+function playCardSound(isSelected) {
+  playAudioAsset("card", () => playCardTone(isSelected));
+}
+
+function ensureBackgroundMusic() {
+  if (!musicEnabled || els.bgmAudio === null || !els.bgmAudio.paused) {
+    return;
+  }
+
+  els.bgmAudio.play().catch(() => {});
+}
+
+function stopBackgroundMusic() {
+  if (els.bgmAudio !== null) {
+    els.bgmAudio.pause();
+  }
+}
+
+function configureBackgroundMusic() {
+  if (els.bgmAudio === null) {
+    return;
+  }
+
+  els.bgmAudio.volume = BGM_VOLUME;
+  els.bgmAudio.loop = true;
+}
+
+function toggleBackgroundMusic() {
+  musicEnabled = !musicEnabled;
+  saveMusicPreference();
+  renderMusicButton();
+
+  if (musicEnabled) {
+    ensureBackgroundMusic();
+  } else {
+    stopBackgroundMusic();
+  }
+}
+
+function renderMusicButton() {
+  els.musicButton.textContent = musicEnabled ? "音乐：开" : "音乐：关";
+  els.musicButton.setAttribute("aria-pressed", String(musicEnabled));
+}
+
+function clearAutoAdvanceTimer() {
+  if (autoAdvanceTimer !== null) {
+    window.clearTimeout(autoAdvanceTimer);
+    autoAdvanceTimer = null;
+  }
+}
+
+function scheduleAutoAdvance() {
+  const delay = state.answeredCount >= CONFIG.totalRounds ? 1100 : 900;
+
+  clearAutoAdvanceTimer();
+  autoAdvanceTimer = window.setTimeout(() => {
+    autoAdvanceTimer = null;
+    moveForward();
+  }, delay);
+}
+
+function playNoticeSound() {
+  playAudioAsset("notice", playNoticeTone);
+}
+
+function playNoticeTone() {
+  playTone({ frequency: 360, duration: 0.09, type: "triangle", volume: 0.1 });
+  playTone({ frequency: 480, duration: 0.09, delay: 0.075, type: "triangle", volume: 0.09 });
+}
+
+function playCorrectSound() {
+  playAudioAsset("correct", playCorrectTone);
+}
+
+function playCorrectTone() {
+  [523, 659, 784].forEach((frequency, index) => {
+    playTone({
+      frequency,
+      duration: 0.15,
+      delay: index * 0.07,
+      type: "triangle",
+      volume: 0.16,
+    });
+  });
+}
+
+function playWrongSound() {
+  playAudioAsset("wrong", playWrongTone);
+}
+
+function playWrongTone() {
+  playTone({ frequency: 260, duration: 0.13, type: "sine", volume: 0.09 });
+  playTone({ frequency: 210, duration: 0.15, delay: 0.09, type: "sine", volume: 0.075 });
+}
+
+function playFinaleSound() {
+  playAudioAsset("finale", playFinaleTone);
+}
+
+function playFinaleTone() {
+  [392, 523, 659, 784, 1046, 1318].forEach((frequency, index) => {
+    playTone({
+      frequency,
+      duration: 0.2,
+      delay: index * 0.075,
+      type: "triangle",
+      volume: 0.17,
+    });
+  });
+}
+
+function launchSmallFirework() {
+  const rect = els.targetNumber.getBoundingClientRect();
+  const x = rect.left + rect.width / 2;
+  const y = rect.top + rect.height * 0.28;
+
+  createFireworkBurst({
+    x,
+    y,
+    particleCount: 28,
+    distance: 122,
+    duration: 940,
+    size: "small",
+  });
+}
+
+function launchFinaleFireworks() {
+  if (prefersReducedMotion) {
+    return;
+  }
+
+  const bursts = [
+    { x: 18, y: 18, delay: 0 },
+    { x: 82, y: 18, delay: 120 },
+    { x: 50, y: 28, delay: 240 },
+    { x: 28, y: 48, delay: 380 },
+    { x: 72, y: 50, delay: 520 },
+    { x: 50, y: 16, delay: 680 },
+    { x: 14, y: 64, delay: 820 },
+    { x: 86, y: 66, delay: 960 },
+  ];
+
+  bursts.forEach((burst) => {
+    window.setTimeout(() => {
+      createFireworkBurst({
+        x: (window.innerWidth * burst.x) / 100,
+        y: (window.innerHeight * burst.y) / 100,
+        particleCount: 44,
+        distance: 190,
+        duration: 1380,
+        size: "large",
+      });
+    }, burst.delay);
+  });
+}
+
+function createFireworkBurst({ x, y, particleCount, distance, duration, size }) {
+  if (els.fireworksLayer === null || prefersReducedMotion) {
+    return;
+  }
+
+  const burst = document.createElement("div");
+  burst.className = `firework-burst firework-${size}`;
+  burst.style.setProperty("--x", `${x}px`);
+  burst.style.setProperty("--y", `${y}px`);
+  burst.style.setProperty("--duration", `${duration}ms`);
+
+  for (let index = 0; index < particleCount; index += 1) {
+    const particle = document.createElement("span");
+    const angle = (Math.PI * 2 * index) / particleCount;
+    const spread = distance * (0.72 + Math.random() * 0.45);
+
+    particle.style.setProperty("--dx", `${Math.cos(angle) * spread}px`);
+    particle.style.setProperty("--dy", `${Math.sin(angle) * spread}px`);
+    particle.style.setProperty("--hue", String(Math.floor(Math.random() * 360)));
+    particle.style.setProperty("--delay", `${Math.random() * 60}ms`);
+    burst.append(particle);
+  }
+
+  els.fireworksLayer.append(burst);
+  window.setTimeout(() => burst.remove(), duration + 240);
 }
 
 function startTimer() {
@@ -414,10 +742,26 @@ function formatElapsed(milliseconds) {
   return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
 
+els.musicButton.addEventListener("click", toggleBackgroundMusic);
 els.submitButton.addEventListener("click", submitAnswer);
 els.nextButton.addEventListener("click", moveForward);
-els.restartButton.addEventListener("click", startSession);
-els.againButton.addEventListener("click", startSession);
+els.restartButton.addEventListener("click", () => {
+  ensureBackgroundMusic();
+  startSession();
+});
+els.againButton.addEventListener("click", () => {
+  ensureBackgroundMusic();
+  startSession();
+});
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    stopBackgroundMusic();
+    return;
+  }
+
+  ensureBackgroundMusic();
+});
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
@@ -425,4 +769,6 @@ if ("serviceWorker" in navigator) {
   });
 }
 
+configureBackgroundMusic();
+renderMusicButton();
 startSession();

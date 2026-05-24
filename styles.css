@@ -232,6 +232,49 @@ button:focus-visible {
   z-index: 1;
 }
 
+.fireworks-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.firework-burst {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: 1px;
+  height: 1px;
+  overflow: visible;
+}
+
+.firework-burst span {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 14px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, #fff 0 12%, transparent 13%),
+    hsl(var(--hue) 92% 62%);
+  box-shadow:
+    0 0 0 4px rgba(255, 255, 255, 0.82),
+    0 0 28px hsl(var(--hue) 92% 62% / 0.9),
+    0 0 44px hsl(var(--hue) 92% 62% / 0.45);
+  transform: translate(-50%, -50%) scale(0.2);
+  animation: firework-pop var(--duration) cubic-bezier(0.12, 0.72, 0.21, 1) var(--delay) forwards;
+}
+
+.firework-large span {
+  width: 20px;
+}
+
+.firework-small span {
+  width: 13px;
+}
+
 .play-area {
   padding: 18px;
   display: grid;
@@ -620,6 +663,11 @@ h2 {
   box-shadow: var(--small-shadow);
 }
 
+.music-button[aria-pressed="true"] {
+  color: #7a2487;
+  background: linear-gradient(135deg, #fff6cc, #ffe0ec);
+}
+
 .result-screen {
   padding: 32px 22px;
   text-align: center;
@@ -659,6 +707,7 @@ h2 {
 }
 
 .celebration {
+  position: relative;
   display: flex;
   justify-content: center;
   margin-bottom: 12px;
@@ -678,6 +727,68 @@ h2 {
 .celebration img + img {
   margin-left: -24px;
   background: var(--mint);
+}
+
+.sister-cheer {
+  position: absolute;
+  left: calc(50% + 76px);
+  top: 4px;
+  max-width: min(220px, 42vw);
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 4px solid #fff;
+  background: linear-gradient(135deg, #fff8c8, #ffe2f0);
+  color: #7a2487;
+  box-shadow: var(--small-shadow);
+  font-size: 1.35rem;
+  font-weight: 900;
+  transform: translateY(10px) scale(0.72);
+  opacity: 0;
+}
+
+.sister-cheer::before {
+  content: "";
+  position: absolute;
+  left: -16px;
+  top: 34px;
+  width: 22px;
+  height: 22px;
+  background: #ffe2f0;
+  border-left: 4px solid #fff;
+  border-bottom: 4px solid #fff;
+  transform: rotate(45deg);
+}
+
+.result-screen.is-celebrating .result-garland span {
+  animation: garland-dance 680ms ease-in-out infinite alternate;
+}
+
+.result-screen.is-celebrating .result-garland span:nth-child(2) {
+  animation-delay: 80ms;
+}
+
+.result-screen.is-celebrating .result-garland span:nth-child(3) {
+  animation-delay: 160ms;
+}
+
+.result-screen.is-celebrating .result-garland span:nth-child(4) {
+  animation-delay: 240ms;
+}
+
+.result-screen.is-celebrating .result-garland span:nth-child(5) {
+  animation-delay: 320ms;
+}
+
+.result-screen.is-celebrating .celebration img {
+  animation: character-cheer 900ms ease-in-out infinite;
+}
+
+.result-screen.is-celebrating .celebration img + img {
+  animation-delay: 160ms;
+}
+
+.result-screen.is-celebrating .sister-cheer {
+  animation: cheer-bubble-pop 520ms cubic-bezier(0.18, 0.88, 0.24, 1.25) 280ms forwards;
 }
 
 .result-score {
@@ -788,6 +899,54 @@ h2 {
   }
 }
 
+@keyframes firework-pop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.2);
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(var(--dx) - 50%), calc(var(--dy) - 50%)) scale(0.88);
+  }
+}
+
+@keyframes character-cheer {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1deg);
+  }
+  45% {
+    transform: translateY(-14px) rotate(2deg);
+  }
+}
+
+@keyframes garland-dance {
+  from {
+    transform: translateY(0) rotate(45deg);
+  }
+  to {
+    transform: translateY(-9px) rotate(63deg);
+  }
+}
+
+@keyframes cheer-bubble-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.66);
+  }
+  72% {
+    opacity: 1;
+    transform: translateY(-5px) scale(1.08);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 @media (max-width: 860px) {
   .app-shell {
     padding: 10px;
@@ -873,6 +1032,25 @@ h2 {
 
   .corner-flower {
     width: 46px;
+  }
+
+  .celebration {
+    margin-bottom: 68px;
+  }
+
+  .sister-cheer {
+    left: 50%;
+    top: 116px;
+    max-width: 180px;
+    font-size: 1.12rem;
+  }
+
+  .sister-cheer::before {
+    left: 24px;
+    top: -13px;
+    border-left: 4px solid #fff;
+    border-top: 4px solid #fff;
+    border-bottom: 0;
   }
 
   .action-bar,
