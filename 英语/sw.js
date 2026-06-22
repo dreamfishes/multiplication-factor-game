@@ -1,7 +1,7 @@
 const CACHE_NAME = 'english-quiz-pwa-v3';
 const CORE_ASSETS = [
   './',
-  './英语闯关小游戏.html',
+  './英语闯关小游戏.html?v=20260622-pwa',
   './manifest.webmanifest?v=20260622-pwa',
   './assets/pwa/icon-180.png?v=20260622-pwa',
   './assets/pwa/icon-192.png?v=20260622-pwa',

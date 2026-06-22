@@ -3,7 +3,7 @@
   "short_name": "英语闯关",
   "description": "Unit 1-6 英语闯关小游戏",
   "lang": "zh-CN",
-  "start_url": "./英语闯关小游戏.html",
+  "start_url": "./英语闯关小游戏.html?v=20260622-pwa",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
