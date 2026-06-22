@@ -1,11 +1,11 @@
-const CACHE_NAME = 'english-quiz-pwa-v2';
+const CACHE_NAME = 'english-quiz-pwa-v3';
 const CORE_ASSETS = [
   './',
   './英语闯关小游戏.html',
-  './manifest.webmanifest',
-  './assets/pwa/icon-180.png',
-  './assets/pwa/icon-192.png',
-  './assets/pwa/icon-512.png'
+  './manifest.webmanifest?v=20260622-pwa',
+  './assets/pwa/icon-180.png?v=20260622-pwa',
+  './assets/pwa/icon-192.png?v=20260622-pwa',
+  './assets/pwa/icon-512.png?v=20260622-pwa'
 ];
 
 function shouldCache(request) {
