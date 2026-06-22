@@ -3,7 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#FFF7E6">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="英语闯关">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>英语闯关小游戏 · Unit 1-6</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="assets/pwa/icon-180.png">
+<link rel="icon" sizes="192x192" href="assets/pwa/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
@@ -610,6 +617,12 @@ function pickDistractors(pool,exclude,n,key){
 
 /* ============ 声音 ============ */
 let muted=false, ac=null, voices=[], enVoices=[], chosenVoice=null, rate=0.8, currentAudio=null;
+const AUDIO_BASE = 'assets/audio/en/';
+const AUDIO_OBJECT_LIMIT = 28;
+const audioObjects = new Map();
+const warmedAudio = new Set();
+const queuedAudio = new Set();
+let audioWarmQueue = [], audioWarmActive = 0, allAudioWarmStarted = false;
 // 偏好更清晰的声音：优先 enhanced/premium/Siri/Google，避开 compact/eloquence
 function scoreVoice(v){
   const n=(v.name||'').toLowerCase();
@@ -838,6 +851,91 @@ function audioSlug(text){
   return String(text||'').toLowerCase().normalize('NFKD')
     .replace(/[’']/g,'').replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'');
 }
+function audioUrl(slug){ return AUDIO_BASE+slug+'.mp3'; }
+function hasLocalAudioText(text){
+  const slug=audioSlug(text);
+  return slug&&PREGENERATED_AUDIO.has(slug)?slug:'';
+}
+function trimAudioObjects(){
+  if(audioObjects.size<=AUDIO_OBJECT_LIMIT)return;
+  for(const [slug,a] of audioObjects){
+    if(a===currentAudio)continue;
+    try{a.pause();a.removeAttribute('src');a.load();}catch(e){}
+    audioObjects.delete(slug);
+    if(audioObjects.size<=AUDIO_OBJECT_LIMIT)return;
+  }
+}
+function getAudioObject(slug){
+  let a=audioObjects.get(slug);
+  if(a)return a;
+  a=new Audio(audioUrl(slug));
+  a.preload='auto';
+  audioObjects.set(slug,a);
+  try{a.load();}catch(e){}
+  trimAudioObjects();
+  return a;
+}
+function queueAudioSlugs(slugs,priority){
+  const add=[];
+  slugs.forEach(slug=>{
+    if(!slug||!PREGENERATED_AUDIO.has(slug)||warmedAudio.has(slug)||queuedAudio.has(slug))return;
+    queuedAudio.add(slug);add.push(slug);
+  });
+  if(priority)audioWarmQueue=add.concat(audioWarmQueue);else audioWarmQueue.push(...add);
+  pumpAudioWarmQueue();
+}
+function pumpAudioWarmQueue(){
+  while(audioWarmActive<3&&audioWarmQueue.length){
+    const slug=audioWarmQueue.shift();
+    queuedAudio.delete(slug);
+    if(warmedAudio.has(slug))continue;
+    audioWarmActive++;
+    fetch(audioUrl(slug),{cache:'force-cache'})
+      .then(r=>{if(r&&r.ok)warmedAudio.add(slug);})
+      .catch(()=>{})
+      .finally(()=>{audioWarmActive--;setTimeout(pumpAudioWarmQueue,70);});
+  }
+}
+function cacheUrlsInWorker(urls){
+  if(!('serviceWorker' in navigator))return;
+  navigator.serviceWorker.ready.then(reg=>{
+    const worker=reg.active||reg.waiting||reg.installing;
+    if(worker)worker.postMessage({type:'CACHE_URLS',urls});
+  }).catch(()=>{});
+}
+function questionAudioSlugs(q){
+  const texts=[];
+  if(q.speakText)texts.push(q.speakText);
+  if(q.learn&&q.learn.speak)texts.push(q.learn.speak);
+  if(q.options)q.options.forEach(o=>{if(o.speak)texts.push(o.speak);});
+  return [...new Set(texts.map(hasLocalAudioText).filter(Boolean))];
+}
+function primeQuestionAudio(q){
+  const slugs=questionAudioSlugs(q);
+  slugs.forEach(slug=>getAudioObject(slug));
+  queueAudioSlugs(slugs,true);
+}
+function warmRoundAudio(){
+  const slugs=[];
+  round.forEach(q=>slugs.push(...questionAudioSlugs(q)));
+  queueAudioSlugs([...new Set(slugs)],true);
+}
+function warmAllAudio(){
+  if(allAudioWarmStarted)return;
+  allAudioWarmStarted=true;
+  const slugs=[...PREGENERATED_AUDIO];
+  queueAudioSlugs(slugs,false);
+  cacheUrlsInWorker(slugs.map(audioUrl));
+}
+function registerAudioCacheWorker(){
+  if(!('serviceWorker' in navigator)||location.protocol==='file:')return;
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('sw.js')
+      .then(()=>cacheUrlsInWorker(['./','./英语闯关小游戏.html','./manifest.webmanifest','./assets/pwa/icon-180.png','./assets/pwa/icon-192.png','./assets/pwa/icon-512.png']))
+      .catch(()=>{});
+  });
+}
+registerAudioCacheWorker();
 function fallbackSpeak(text){
   if(muted||!('speechSynthesis' in window)||!text)return;
   try{
@@ -853,13 +951,13 @@ function stopVoice(){
 }
 function speak(text){
   if(muted||!text)return;
-  const slug=audioSlug(text);
+  const slug=hasLocalAudioText(text);
   if(!slug){fallbackSpeak(text);return;}
-  if(!PREGENERATED_AUDIO.has(slug)){fallbackSpeak(text);return;}
   stopVoice();
   try{
-    const a=new Audio('assets/audio/en/'+slug+'.mp3');
-    currentAudio=a;a.preload='auto';a.playbackRate=rate;
+    const a=getAudioObject(slug);
+    try{a.pause();a.currentTime=0;}catch(e){}
+    currentAudio=a;a.playbackRate=rate;
     let usedFallback=false;
     const useFallback=()=>{
       if(usedFallback||currentAudio!==a)return;
@@ -1028,6 +1126,8 @@ function startGame(units){
   gOptN = gDiff==='easy' ? 3 : 4;
   round=buildRound(units); qi=0; stars=0;
   $('starCount').textContent='0';
+  warmRoundAudio();
+  setTimeout(warmAllAudio,1200);
   show('quizScreen');
   renderQ();
 }
@@ -1035,6 +1135,7 @@ function startGame(units){
 function renderQ(){
   locked=false;
   const q=round[qi];
+  primeQuestionAudio(q);
   $('qtype').textContent=q.type;
   $('qprompt').textContent=q.prompt;
   $('qcount').textContent='第 '+(qi+1)+' / '+round.length+' 题';
