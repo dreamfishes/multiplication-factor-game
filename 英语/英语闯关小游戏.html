@@ -609,7 +609,7 @@ function pickDistractors(pool,exclude,n,key){
 }
 
 /* ============ 声音 ============ */
-let muted=false, ac=null, voices=[], enVoices=[], chosenVoice=null, rate=0.8;
+let muted=false, ac=null, voices=[], enVoices=[], chosenVoice=null, rate=0.8, currentAudio=null;
 // 偏好更清晰的声音：优先 enhanced/premium/Siri/Google，避开 compact/eloquence
 function scoreVoice(v){
   const n=(v.name||'').toLowerCase();
@@ -631,8 +631,214 @@ function loadVoices(){
   if(!chosenVoice && enVoices.length) chosenVoice=enVoices[0];
   buildVoiceList();
 }
+const PREGENERATED_AUDIO = new Set([
+  "a_clock_has_twelve_numbers",
+  "after",
+  "all",
+  "at",
+  "back",
+  "bag",
+  "ball",
+  "bed",
+  "behind",
+  "beside",
+  "big",
+  "bike",
+  "boat",
+  "body",
+  "bone",
+  "book",
+  "box",
+  "boy",
+  "bread",
+  "breakfast",
+  "bus",
+  "bye",
+  "cake",
+  "can_i_use_your_eraser_please",
+  "canada",
+  "candy",
+  "cap",
+  "car",
+  "card",
+  "cat",
+  "china",
+  "choose",
+  "class",
+  "classmate",
+  "colourful",
+  "computer",
+  "cone",
+  "cool",
+  "cut",
+  "cute",
+  "dad",
+  "dance",
+  "date",
+  "do_you_have_old_things",
+  "dog",
+  "dogs_are_friendly",
+  "doll",
+  "duck",
+  "egg",
+  "eighteen",
+  "eleven",
+  "english",
+  "eraser",
+  "face",
+  "family",
+  "fat",
+  "fifteen",
+  "fin",
+  "find",
+  "fine",
+  "fourteen",
+  "fox",
+  "from",
+  "fruit",
+  "fun",
+  "gift",
+  "girl",
+  "has",
+  "hat",
+  "have_some_milk_too",
+  "he",
+  "healthy",
+  "hear",
+  "her",
+  "home",
+  "hot",
+  "how_many_books_do_we_have",
+  "how_many_boxes_do_we_need",
+  "how_much_is_this_bag",
+  "i_often_make_her_gifts",
+  "i_see_and_hear_in_class",
+  "i_smell_with_my_nose",
+  "i_taste_with_my_tongue",
+  "id_like_some_bread_and_eggs_please",
+  "in",
+  "is_it_on_the_shelf",
+  "its_a_pencil",
+  "its_in_the_box",
+  "its_twenty_yuan",
+  "juice",
+  "jump",
+  "keep",
+  "kite",
+  "learn",
+  "leg",
+  "let_me_help",
+  "lets_make_a_card",
+  "lets_sing_and_dance",
+  "like",
+  "lips",
+  "long",
+  "love",
+  "man",
+  "map",
+  "me",
+  "meat",
+  "milk",
+  "mr",
+  "much",
+  "mum",
+  "name",
+  "near",
+  "neighbour",
+  "nineteen",
+  "no_thank_you",
+  "noodle",
+  "nose",
+  "not",
+  "note",
+  "old",
+  "on",
+  "or",
+  "orange",
+  "paper",
+  "pay",
+  "pen",
+  "pencil",
+  "pencil_sharpener",
+  "picture",
+  "piggy_bank",
+  "plate",
+  "put",
+  "rice",
+  "right",
+  "ruler",
+  "run",
+  "save",
+  "see",
+  "sense",
+  "seventeen",
+  "she",
+  "shelf",
+  "short",
+  "sing",
+  "singapore",
+  "sit",
+  "six",
+  "sixteen",
+  "size",
+  "slow",
+  "smell",
+  "smile",
+  "so",
+  "song",
+  "soup",
+  "spend",
+  "still",
+  "student",
+  "tail",
+  "talk",
+  "taste",
+  "teacher",
+  "thailand",
+  "these",
+  "they_are_good_for_you",
+  "theyre_grapes",
+  "thin",
+  "thirteen",
+  "this_boat_is_cool",
+  "this_is_my_healthy_plate",
+  "time",
+  "today",
+  "tongue",
+  "touch",
+  "tube",
+  "twelve",
+  "twenty",
+  "uk",
+  "under",
+  "usa",
+  "use",
+  "vegetable",
+  "very",
+  "we",
+  "we_have_fifteen_books",
+  "what_are_these",
+  "whats_this",
+  "whats_your_name",
+  "where",
+  "where_are_you_from",
+  "where_is_my_animal_book",
+  "who",
+  "whos_that_girl",
+  "woman",
+  "would_you_like_some_rice_and_meat",
+  "yellow",
+  "yes_i_have_some_old_books",
+  "yes_please",
+  "you_can_keep_it",
+  "yummy"
+]);
 if('speechSynthesis' in window){ loadVoices(); speechSynthesis.onvoiceschanged=loadVoices; }
-function speak(text){
+function audioSlug(text){
+  return String(text||'').toLowerCase().normalize('NFKD')
+    .replace(/[’']/g,'').replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'');
+}
+function fallbackSpeak(text){
   if(muted||!('speechSynthesis' in window)||!text)return;
   try{
     const u=new SpeechSynthesisUtterance(text);
@@ -640,6 +846,30 @@ function speak(text){
     if(chosenVoice){u.voice=chosenVoice;u.lang=chosenVoice.lang;}else{u.lang='en-GB';}
     speechSynthesis.cancel();speechSynthesis.speak(u);
   }catch(e){}
+}
+function stopVoice(){
+  if(currentAudio){try{currentAudio.pause();currentAudio.currentTime=0;}catch(e){} currentAudio=null;}
+  if('speechSynthesis' in window){try{speechSynthesis.cancel();}catch(e){}}
+}
+function speak(text){
+  if(muted||!text)return;
+  const slug=audioSlug(text);
+  if(!slug){fallbackSpeak(text);return;}
+  if(!PREGENERATED_AUDIO.has(slug)){fallbackSpeak(text);return;}
+  stopVoice();
+  try{
+    const a=new Audio('assets/audio/en/'+slug+'.mp3');
+    currentAudio=a;a.preload='auto';a.playbackRate=rate;
+    let usedFallback=false;
+    const useFallback=()=>{
+      if(usedFallback||currentAudio!==a)return;
+      usedFallback=true;currentAudio=null;fallbackSpeak(text);
+    };
+    a.onerror=useFallback;
+    a.onended=()=>{if(currentAudio===a)currentAudio=null;};
+    const p=a.play();
+    if(p&&p.catch)p.catch(useFallback);
+  }catch(e){fallbackSpeak(text);}
 }
 function beep(kind){
   if(muted)return;
@@ -1008,9 +1238,9 @@ document.querySelectorAll('.bigbtn[data-units]').forEach(b=>{
 });
 $('nextBtn').onclick=nextQ;
 $('againBtn').onclick=()=>{ const u=round.length?lastUnits:[1,2,3,4,5,6]; startGame(u); };
-$('homeBtn').onclick=()=>{ try{speechSynthesis.cancel();}catch(e){} show('startScreen'); };
+$('homeBtn').onclick=()=>{ stopVoice(); show('startScreen'); };
 $('homeBtn2').onclick=()=>show('startScreen');
-$('muteBtn').onclick=()=>{ muted=!muted; $('muteBtn').textContent=muted?'🔇':'🔊'; if(muted){try{speechSynthesis.cancel();}catch(e){}} };
+$('muteBtn').onclick=()=>{ muted=!muted; $('muteBtn').textContent=muted?'🔇':'🔊'; if(muted)stopVoice(); };
 
 // 难度选择
 document.querySelectorAll('.diff[data-diff]').forEach(b=>{
