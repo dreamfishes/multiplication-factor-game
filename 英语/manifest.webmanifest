@@ -3,7 +3,7 @@
   "short_name": "英语闯关",
   "description": "Unit 1-6 英语闯关小游戏",
   "lang": "zh-CN",
-  "start_url": "./英语闯关小游戏.html?v=20260622-pwa",
+  "start_url": "./英语闯关小游戏.html?v=20260622-pwa2",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
@@ -11,19 +11,19 @@
   "theme_color": "#FFF7E6",
   "icons": [
     {
-      "src": "assets/pwa/icon-180.png?v=20260622-pwa",
+      "src": "assets/pwa/icon-180.png?v=20260622-pwa2",
       "sizes": "180x180",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "assets/pwa/icon-192.png?v=20260622-pwa",
+      "src": "assets/pwa/icon-192.png?v=20260622-pwa2",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "assets/pwa/icon-512.png?v=20260622-pwa",
+      "src": "assets/pwa/icon-512.png?v=20260622-pwa2",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
