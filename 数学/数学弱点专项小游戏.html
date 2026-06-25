@@ -1,0 +1,1563 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#eef6f0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="数学专项">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>三年级数学弱点专项小游戏</title>
+<style>
+  :root {
+    color-scheme: light;
+    --ink: #24312c;
+    --muted: #65736d;
+    --paper: #fffdf3;
+    --mint: #dff3e8;
+    --leaf: #2f8f68;
+    --blue: #347aa4;
+    --blue-soft: #dceffa;
+    --gold: #e7ad3f;
+    --gold-soft: #f9e7ae;
+    --coral: #dd6645;
+    --coral-soft: #f8d9cc;
+    --violet: #7160a8;
+    --violet-soft: #e6e1f7;
+    --right: #249263;
+    --wrong: #c5433e;
+    --line: rgba(36, 49, 44, 0.18);
+    --shadow: 0 20px 50px rgba(45, 70, 56, 0.18);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    min-height: 100%;
+    margin: 0;
+  }
+
+  body {
+    color: var(--ink);
+    font-family: "PingFang SC", "Microsoft YaHei", "Yuanti SC", sans-serif;
+    letter-spacing: 0;
+    background:
+      linear-gradient(118deg, rgba(47, 143, 104, 0.2) 0 18%, transparent 18% 35%, rgba(52, 122, 164, 0.16) 35% 52%, transparent 52%),
+      radial-gradient(circle at 12% 16%, rgba(231, 173, 63, 0.3), transparent 26%),
+      radial-gradient(circle at 86% 12%, rgba(221, 102, 69, 0.23), transparent 28%),
+      linear-gradient(180deg, #f7fbef 0%, #e9f4ef 58%, #eaf1dc 100%);
+    overflow-x: hidden;
+  }
+
+  button {
+    min-height: 48px;
+    border: 0;
+    border-radius: 8px;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button:focus-visible {
+    outline: 4px solid rgba(52, 122, 164, 0.36);
+    outline-offset: 3px;
+  }
+
+  .shell {
+    width: min(1180px, 100%);
+    min-height: 100dvh;
+    margin: 0 auto;
+    padding: 16px;
+    display: grid;
+    align-items: center;
+  }
+
+  .app {
+    position: relative;
+    width: 100%;
+    min-height: min(820px, calc(100dvh - 32px));
+    border: 3px solid rgba(36, 49, 44, 0.82);
+    border-radius: 10px;
+    background:
+      linear-gradient(90deg, rgba(255, 255, 255, 0.68), rgba(255, 255, 255, 0)),
+      repeating-linear-gradient(0deg, rgba(36, 49, 44, 0.045) 0 1px, transparent 1px 34px),
+      var(--paper);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .app::before {
+    content: "";
+    position: absolute;
+    inset: 12px;
+    border: 1px solid rgba(36, 49, 44, 0.14);
+    border-radius: 8px;
+    pointer-events: none;
+  }
+
+  .topbar {
+    position: relative;
+    z-index: 1;
+    padding: 20px 26px 8px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 14px;
+    align-items: start;
+  }
+
+  .brand {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    min-width: 0;
+  }
+
+  .brand-icon {
+    width: 62px;
+    height: 62px;
+    border: 3px solid var(--ink);
+    border-radius: 8px;
+    background: var(--leaf);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    font-size: 34px;
+    font-weight: 900;
+    box-shadow: 5px 5px 0 rgba(36, 49, 44, 0.14);
+    transform: rotate(-4deg);
+  }
+
+  .eyebrow {
+    margin: 0 0 4px;
+    color: var(--blue);
+    font-size: 13px;
+    font-weight: 900;
+  }
+
+  h1,
+  h2 {
+    margin: 0;
+    line-height: 1.12;
+  }
+
+  h1 {
+    font-size: clamp(30px, 4.8vw, 52px);
+    font-weight: 900;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(78px, auto));
+    gap: 8px;
+  }
+
+  .stat {
+    border: 2px solid rgba(36, 49, 44, 0.24);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.72);
+    padding: 8px 10px;
+    text-align: center;
+    box-shadow: 3px 3px 0 rgba(36, 49, 44, 0.08);
+  }
+
+  .stat span {
+    display: block;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  .stat strong {
+    display: block;
+    margin-top: 1px;
+    font-size: 18px;
+    font-weight: 900;
+  }
+
+  .screen {
+    position: relative;
+    z-index: 1;
+    min-height: 642px;
+    padding: 6px 26px 26px;
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  .start-layout {
+    min-height: 620px;
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(360px, 1.1fr);
+    gap: 24px;
+    align-items: center;
+  }
+
+  .hero {
+    display: grid;
+    justify-items: center;
+    gap: 18px;
+    text-align: center;
+  }
+
+  .hero svg {
+    width: min(390px, 88vw);
+    filter: drop-shadow(0 18px 20px rgba(45, 70, 56, 0.16));
+  }
+
+  .hero h2 {
+    max-width: 440px;
+    font-size: clamp(30px, 5vw, 48px);
+    font-weight: 900;
+  }
+
+  .hero p {
+    max-width: 460px;
+    margin: 0;
+    color: var(--muted);
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.7;
+  }
+
+  .mode-grid {
+    display: grid;
+    gap: 12px;
+  }
+
+  .mode-card {
+    min-height: 96px;
+    border: 3px solid var(--ink);
+    border-radius: 8px;
+    background: #fffdf4;
+    padding: 14px 16px;
+    display: grid;
+    grid-template-columns: 56px 1fr auto;
+    gap: 12px;
+    align-items: center;
+    text-align: left;
+    box-shadow: 5px 5px 0 rgba(36, 49, 44, 0.14);
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+  }
+
+  .mode-card:nth-child(2) {
+    background: var(--mint);
+  }
+
+  .mode-card:nth-child(3) {
+    background: var(--blue-soft);
+  }
+
+  .mode-card:nth-child(4) {
+    background: var(--gold-soft);
+  }
+
+  .mode-card:nth-child(5) {
+    background: var(--coral-soft);
+  }
+
+  .mode-card:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 7px 7px 0 rgba(36, 49, 44, 0.12);
+  }
+
+  .mode-card:active {
+    transform: translate(4px, 4px);
+    box-shadow: 1px 1px 0 rgba(36, 49, 44, 0.14);
+  }
+
+  .mode-icon {
+    width: 56px;
+    height: 56px;
+    border: 3px solid var(--ink);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.72);
+    display: grid;
+    place-items: center;
+    color: var(--coral);
+    font-size: 28px;
+    font-weight: 900;
+  }
+
+  .mode-title {
+    display: block;
+    font-size: 24px;
+    font-weight: 900;
+  }
+
+  .mode-detail {
+    display: block;
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.45;
+  }
+
+  .mode-arrow {
+    font-size: 30px;
+    font-weight: 900;
+  }
+
+  .progress {
+    height: 14px;
+    margin: 0 0 16px;
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.64);
+    overflow: hidden;
+  }
+
+  .progress i {
+    display: block;
+    width: 0;
+    height: 100%;
+    background: linear-gradient(90deg, var(--leaf), var(--blue), var(--gold), var(--coral));
+    transition: width 0.25s ease;
+  }
+
+  .quiz-layout {
+    display: grid;
+    grid-template-columns: 250px minmax(0, 1fr);
+    gap: 18px;
+    align-items: stretch;
+  }
+
+  .side,
+  .question {
+    border: 3px solid rgba(36, 49, 44, 0.44);
+    border-radius: 8px;
+    background: rgba(255, 253, 243, 0.86);
+    box-shadow: 5px 5px 0 rgba(36, 49, 44, 0.1);
+  }
+
+  .side {
+    min-height: 486px;
+    padding: 16px;
+    display: grid;
+    gap: 12px;
+    align-content: start;
+  }
+
+  .round-card {
+    border: 3px solid var(--ink);
+    border-radius: 8px;
+    background: var(--gold-soft);
+    padding: 14px;
+    text-align: center;
+  }
+
+  .round-card span {
+    display: block;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 900;
+  }
+
+  .round-card strong {
+    display: block;
+    margin-top: 4px;
+    font-size: 30px;
+    font-weight: 900;
+  }
+
+  .steps {
+    display: grid;
+    gap: 8px;
+  }
+
+  .step {
+    height: 12px;
+    border: 1px solid rgba(36, 49, 44, 0.26);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.7);
+  }
+
+  .step.good {
+    background: var(--right);
+  }
+
+  .step.bad {
+    background: var(--wrong);
+  }
+
+  .hint-box {
+    margin-top: auto;
+    border-left: 6px solid var(--leaf);
+    background: rgba(255, 255, 255, 0.62);
+    padding: 12px;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.6;
+  }
+
+  .tool-button {
+    border: 3px solid var(--ink);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.72);
+    padding: 0 14px;
+    font-weight: 900;
+    box-shadow: 3px 3px 0 rgba(36, 49, 44, 0.12);
+  }
+
+  .question {
+    min-height: 486px;
+    padding: clamp(18px, 3vw, 30px);
+    display: grid;
+    grid-template-rows: auto auto minmax(180px, 1fr) auto auto;
+    gap: 14px;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .tag {
+    border: 1px solid rgba(36, 49, 44, 0.26);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.7);
+    padding: 5px 10px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 900;
+  }
+
+  .tag.primary {
+    color: #fff;
+    background: var(--violet);
+    border-color: var(--violet);
+  }
+
+  .prompt {
+    font-size: clamp(24px, 3.6vw, 42px);
+    font-weight: 900;
+    line-height: 1.25;
+  }
+
+  .prompt small {
+    display: block;
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: 15px;
+    font-weight: 800;
+  }
+
+  .scene {
+    min-height: 190px;
+    border: 2px dashed rgba(36, 49, 44, 0.22);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.48);
+    display: grid;
+    place-items: center;
+    padding: 14px;
+    overflow: hidden;
+  }
+
+  .scene svg {
+    max-width: 100%;
+    max-height: 310px;
+  }
+
+  .word-scene {
+    width: 100%;
+    max-width: 650px;
+    border: 3px solid var(--ink);
+    border-radius: 8px;
+    background: #fff9e7;
+    padding: 18px;
+    box-shadow: 4px 4px 0 rgba(36, 49, 44, 0.1);
+    font-size: clamp(20px, 3vw, 30px);
+    font-weight: 900;
+    line-height: 1.5;
+  }
+
+  .word-scene em {
+    color: var(--coral);
+    font-style: normal;
+  }
+
+  .options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .option {
+    min-height: 76px;
+    border: 3px solid var(--ink);
+    border-radius: 8px;
+    background: #fffdf6;
+    padding: 12px;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    font-size: clamp(20px, 3vw, 30px);
+    font-weight: 900;
+    line-height: 1.18;
+    box-shadow: 4px 4px 0 rgba(36, 49, 44, 0.14);
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+  }
+
+  .option:hover:not(:disabled) {
+    transform: translate(-1px, -1px);
+  }
+
+  .option:active:not(:disabled) {
+    transform: translate(3px, 3px);
+    box-shadow: 1px 1px 0 rgba(36, 49, 44, 0.14);
+  }
+
+  .option.correct {
+    color: #fff;
+    background: var(--right);
+    border-color: #1d6e4d;
+  }
+
+  .option.wrong {
+    color: #fff;
+    background: var(--wrong);
+    border-color: #8d2f2c;
+  }
+
+  .option.dim {
+    opacity: 0.46;
+  }
+
+  .option:disabled {
+    cursor: default;
+  }
+
+  .feedback {
+    min-height: 74px;
+    border: 2px solid rgba(36, 49, 44, 0.24);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.72);
+    padding: 12px 14px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    align-items: center;
+    color: var(--muted);
+    font-weight: 800;
+    line-height: 1.5;
+  }
+
+  .feedback strong {
+    color: var(--ink);
+  }
+
+  .next-button,
+  .primary-action,
+  .secondary-action {
+    border: 3px solid var(--ink);
+    border-radius: 8px;
+    font-weight: 900;
+    box-shadow: 3px 3px 0 rgba(36, 49, 44, 0.14);
+  }
+
+  .next-button {
+    background: var(--gold);
+    padding: 0 18px;
+  }
+
+  .result-layout {
+    min-height: 620px;
+    display: grid;
+    grid-template-columns: minmax(260px, 0.88fr) minmax(0, 1.12fr);
+    gap: 24px;
+    align-items: center;
+  }
+
+  .result-medal {
+    min-height: 420px;
+    display: grid;
+    place-items: center;
+  }
+
+  .medal {
+    width: min(330px, 82vw);
+    aspect-ratio: 1;
+    border: 9px double var(--gold);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.58);
+    display: grid;
+    place-items: center;
+    text-align: center;
+    transform: rotate(-4deg);
+  }
+
+  .medal strong {
+    display: block;
+    color: var(--coral);
+    font-size: clamp(56px, 11vw, 100px);
+    line-height: 0.95;
+    font-weight: 900;
+  }
+
+  .medal span {
+    display: block;
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: 18px;
+    font-weight: 900;
+  }
+
+  .result-detail {
+    display: grid;
+    gap: 14px;
+  }
+
+  .result-detail h2 {
+    font-size: clamp(30px, 5vw, 52px);
+    font-weight: 900;
+  }
+
+  .result-detail p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1.7;
+  }
+
+  .weak-list {
+    display: grid;
+    gap: 8px;
+    max-height: 240px;
+    overflow: auto;
+    padding-right: 4px;
+  }
+
+  .weak-item {
+    border: 1px solid rgba(36, 49, 44, 0.22);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.62);
+    padding: 9px 11px;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.45;
+  }
+
+  .weak-item strong {
+    color: var(--ink);
+  }
+
+  .result-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .primary-action {
+    min-width: 150px;
+    background: var(--leaf);
+    color: #fff;
+    padding: 0 20px;
+  }
+
+  .secondary-action {
+    min-width: 132px;
+    background: rgba(255, 255, 255, 0.72);
+    padding: 0 18px;
+  }
+
+  .burst {
+    position: fixed;
+    left: var(--x);
+    top: var(--y);
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--color);
+    pointer-events: none;
+    animation: burst 760ms ease-out forwards;
+    z-index: 20;
+  }
+
+  @keyframes burst {
+    from {
+      transform: translate(0, 0) scale(1);
+      opacity: 1;
+    }
+    to {
+      transform: translate(var(--dx), var(--dy)) scale(0.15);
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  @media (max-width: 920px) {
+    .topbar,
+    .start-layout,
+    .quiz-layout,
+    .result-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .side {
+      min-height: auto;
+    }
+
+    .steps {
+      grid-template-columns: repeat(12, 1fr);
+    }
+
+    .hint-box {
+      margin-top: 0;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .shell {
+      padding: 10px;
+      align-items: stretch;
+    }
+
+    .app {
+      min-height: calc(100dvh - 20px);
+    }
+
+    .topbar {
+      padding: 18px 18px 8px;
+    }
+
+    .screen {
+      min-height: auto;
+      padding: 4px 18px 20px;
+    }
+
+    .brand-icon {
+      width: 52px;
+      height: 52px;
+      font-size: 28px;
+    }
+
+    .stats {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .mode-card {
+      grid-template-columns: 46px 1fr;
+      min-height: 92px;
+    }
+
+    .mode-icon {
+      width: 46px;
+      height: 46px;
+      font-size: 23px;
+    }
+
+    .mode-arrow {
+      display: none;
+    }
+
+    .mode-title {
+      font-size: 21px;
+    }
+
+    .options {
+      grid-template-columns: 1fr;
+    }
+
+    .feedback {
+      grid-template-columns: 1fr;
+    }
+
+    .next-button {
+      width: 100%;
+    }
+  }
+</style>
+</head>
+<body>
+<main class="shell">
+  <section class="app" aria-label="三年级数学弱点专项小游戏">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-icon">数</div>
+        <div>
+          <p class="eyebrow">三年级下册 · 弱点专项</p>
+          <h1>数学侦探营</h1>
+        </div>
+      </div>
+      <div class="stats" aria-label="本局成绩">
+        <div class="stat"><span>得分</span><strong id="scoreText">0</strong></div>
+        <div class="stat"><span>连对</span><strong id="streakText">0</strong></div>
+        <div class="stat"><span>题目</span><strong id="roundText">0/12</strong></div>
+      </div>
+    </header>
+
+    <section class="screen" id="startScreen">
+      <div class="start-layout">
+        <div class="hero">
+          <svg viewBox="0 0 380 360" role="img" aria-label="数学训练台">
+            <defs>
+              <linearGradient id="boardGrad" x1="0" x2="1" y1="0" y2="1">
+                <stop stop-color="#fffbe8"/>
+                <stop offset="1" stop-color="#dff3e8"/>
+              </linearGradient>
+            </defs>
+            <rect x="48" y="44" width="284" height="218" rx="20" fill="url(#boardGrad)" stroke="#24312c" stroke-width="6"/>
+            <path d="M92 92h72v54H92zM164 146h54v54h-54zM218 92h70v108h-70z" fill="#dceffa" stroke="#347aa4" stroke-width="5"/>
+            <circle cx="104" cy="244" r="18" fill="#dd6645" stroke="#24312c" stroke-width="5"/>
+            <circle cx="274" cy="244" r="18" fill="#e7ad3f" stroke="#24312c" stroke-width="5"/>
+            <path d="M104 244h170" stroke="#24312c" stroke-width="8" stroke-linecap="round"/>
+            <circle cx="288" cy="88" r="46" fill="#fffdf3" stroke="#24312c" stroke-width="5"/>
+            <path d="M288 88l0-28M288 88l24 14" stroke="#24312c" stroke-width="6" stroke-linecap="round"/>
+            <text x="92" y="308" font-size="34" font-weight="900" fill="#2f8f68">找错因</text>
+            <text x="220" y="308" font-size="34" font-weight="900" fill="#dd6645">再闯关</text>
+          </svg>
+          <h2>专练真正卡住的题</h2>
+          <p>每局 12 题。先看图、找规律、判断关系，再算答案；错题会在结算页留下复习提示。</p>
+        </div>
+        <div class="mode-grid" id="modeGrid">
+          <button class="mode-card" type="button" data-mode="mix">
+            <span class="mode-icon">全</span>
+            <span><span class="mode-title">混合挑战</span><span class="mode-detail">四类弱点随机出现，像期末卷一样切换思路</span></span>
+            <span class="mode-arrow">›</span>
+          </button>
+          <button class="mode-card" type="button" data-mode="perimeter">
+            <span class="mode-icon">周</span>
+            <span><span class="mode-title">组合图形周长</span><span class="mode-detail">只数外面一圈，凹进去和共用边最容易错</span></span>
+            <span class="mode-arrow">›</span>
+          </button>
+          <button class="mode-card" type="button" data-mode="direction">
+            <span class="mode-icon">钟</span>
+            <span><span class="mode-title">几点钟方向</span><span class="mode-detail">12 点在上，3 点在右，先定四个正方向</span></span>
+            <span class="mode-arrow">›</span>
+          </button>
+          <button class="mode-card" type="button" data-mode="pattern">
+            <span class="mode-icon">律</span>
+            <span><span class="mode-title">数字找规律</span><span class="mode-detail">相邻差、倍数、奇偶位分开看</span></span>
+            <span class="mode-arrow">›</span>
+          </button>
+          <button class="mode-card" type="button" data-mode="word">
+            <span class="mode-icon">题</span>
+            <span><span class="mode-title">应用题拆解</span><span class="mode-detail">先圈问题和单位，再判断加减乘除</span></span>
+            <span class="mode-arrow">›</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen hidden" id="quizScreen">
+      <div class="progress" aria-hidden="true"><i id="progressFill"></i></div>
+      <div class="quiz-layout">
+        <aside class="side">
+          <div class="round-card">
+            <span id="modeLabel">混合挑战</span>
+            <strong id="roundBig">1</strong>
+          </div>
+          <div class="steps" id="steps" aria-label="答题记录"></div>
+          <button class="tool-button" type="button" id="soundButton" aria-pressed="true">音效：开</button>
+          <button class="tool-button" type="button" id="homeButton">换专项</button>
+          <div class="hint-box" id="hintBox">先判断题型，再动手算。</div>
+        </aside>
+
+        <section class="question" aria-live="polite">
+          <div class="tags">
+            <span class="tag primary" id="typeTag">组合图形周长</span>
+            <span class="tag" id="levelTag">基础</span>
+            <span class="tag" id="skillTag">只数外圈</span>
+          </div>
+          <div class="prompt" id="promptText"></div>
+          <div class="scene" id="sceneBox"></div>
+          <div class="options" id="optionsBox"></div>
+          <div class="feedback hidden" id="feedbackBox">
+            <div id="feedbackText"></div>
+            <button class="next-button" type="button" id="nextButton">下一题</button>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section class="screen hidden" id="resultScreen">
+      <div class="result-layout">
+        <div class="result-medal">
+          <div class="medal">
+            <div>
+              <strong id="finalScore">0/12</strong>
+              <span id="finalRate">正确率 0%</span>
+            </div>
+          </div>
+        </div>
+        <div class="result-detail">
+          <p class="eyebrow">本局完成</p>
+          <h2 id="resultTitle">继续侦探训练</h2>
+          <p id="resultSummary">错题会显示在下面。</p>
+          <div class="weak-list" id="weakList"></div>
+          <div class="result-actions">
+            <button class="primary-action" type="button" id="againButton">再练一局</button>
+            <button class="secondary-action" type="button" id="resultHomeButton">换专项</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </section>
+</main>
+
+<script>
+const ROUND_TOTAL = 12;
+const STORE_KEY = "math-detective-camp-v1";
+const SOUND_ASSETS = {
+  click: "../点击答案音效.mp3",
+  correct: "../答对音效.mp3",
+  wrong: "../答错音效.mp3",
+  finale: "../最后结算庆祝.mp3",
+};
+
+const MODES = [
+  { id: "mix", label: "混合挑战", types: ["perimeter", "direction", "pattern", "word"] },
+  { id: "perimeter", label: "组合图形周长", types: ["perimeter"] },
+  { id: "direction", label: "几点钟方向", types: ["direction"] },
+  { id: "pattern", label: "数字找规律", types: ["pattern"] },
+  { id: "word", label: "应用题拆解", types: ["word"] },
+];
+
+const HINTS = {
+  perimeter: "缺角 L 形先看底边和左边，缺口宽高会和少掉的外边互相抵消。",
+  direction: "不看数字，先想上方是 12 点，右方是 3 点，再配方位词。",
+  pattern: "先看相邻差，再看倍数；不行就把奇数位、偶数位分开看。",
+  word: "先圈问题，再看单位和关键词，最后列式。"
+};
+
+const HOUR_LABELS = {
+  1: "1 点钟方向，东北方",
+  2: "2 点钟方向，东北方",
+  3: "3 点钟方向，东方",
+  4: "4 点钟方向，东南方",
+  5: "5 点钟方向，东南方",
+  6: "6 点钟方向，南方",
+  7: "7 点钟方向，西南方",
+  8: "8 点钟方向，西南方",
+  9: "9 点钟方向，西方",
+  10: "10 点钟方向，西北方",
+  11: "11 点钟方向，西北方",
+  12: "12 点钟方向，北方",
+};
+
+const PATTERN_BANK = [
+  { seq: [6, 12, 18, null, 30, 36], answer: 24, rule: "相邻两个数都增加 6。" },
+  { seq: [3, 6, 12, null, 48, 96], answer: 24, rule: "每次乘 2。" },
+  { seq: [2, 5, 9, 14, null, 27], answer: 20, rule: "相邻差依次是 3、4、5、6、7。" },
+  { seq: [80, 72, 64, null, 48, 40], answer: 56, rule: "相邻两个数都减少 8。" },
+  { seq: [1, 3, 2, 6, 3, null, 4, 12], answer: 9, rule: "奇数位是 1、2、3、4；偶数位是 3、6、9、12。" },
+  { seq: [4, 9, 14, 19, null, 29], answer: 24, rule: "相邻两个数都增加 5。" },
+  { seq: [96, 48, 24, null, 6, 3], answer: 12, rule: "每次除以 2。" },
+  { seq: [7, 14, 13, 26, 25, null], answer: 50, rule: "先乘 2，再减 1，交替进行。" },
+  { seq: [5, 10, 20, 35, null, 80], answer: 55, rule: "相邻差依次是 5、10、15、20、25。" },
+  { seq: [2, 4, 7, 11, 16, null], answer: 22, rule: "相邻差依次是 2、3、4、5、6。" },
+  { seq: [81, 72, 63, null, 45, 36], answer: 54, rule: "相邻两个数都减少 9。" },
+  { seq: [2, 6, 18, null, 162], answer: 54, rule: "每次乘 3。" },
+];
+
+const WORD_BANK = [
+  {
+    prompt: "一根彩带长 96 厘米，先剪下 28 厘米，又剪下 35 厘米，还剩多少厘米？",
+    answer: "33 厘米",
+    options: ["33 厘米", "61 厘米", "63 厘米", "159 厘米"],
+    explain: "问“还剩”，要从总长里连续减去剪下的：96 - 28 - 35 = 33。"
+  },
+  {
+    prompt: "学校买来 6 箱跳绳，每箱 24 根，分给三年级 98 根，还剩多少根？",
+    answer: "46 根",
+    options: ["46 根", "144 根", "52 根", "190 根"],
+    explain: "先求一共 6 × 24 = 144 根，再减去 98 根，剩 46 根。"
+  },
+  {
+    prompt: "一本书 168 页，小雨 4 天看完，平均每天看多少页？",
+    answer: "42 页",
+    options: ["42 页", "41 页", "672 页", "164 页"],
+    explain: "平均每天看多少页，用总页数除以天数：168 ÷ 4 = 42。"
+  },
+  {
+    prompt: "每张门票 18 元，4 个大人和 3 个小朋友都买同价票，一共要多少钱？",
+    answer: "126 元",
+    options: ["126 元", "72 元", "54 元", "108 元"],
+    explain: "一共 7 人，每人 18 元，18 × 7 = 126。"
+  },
+  {
+    prompt: "一个长方形操场长 38 米，宽 22 米，绕它跑一圈是多少米？",
+    answer: "120 米",
+    options: ["120 米", "60 米", "836 米", "98 米"],
+    explain: "绕一圈求周长：(38 + 22) × 2 = 120。"
+  },
+  {
+    prompt: "3 个同样的文具盒 45 元，买 8 个这样的文具盒要多少元？",
+    answer: "120 元",
+    options: ["120 元", "15 元", "53 元", "360 元"],
+    explain: "先求 1 个文具盒 45 ÷ 3 = 15 元，再求 8 个：15 × 8 = 120。"
+  },
+  {
+    prompt: "果园上午摘了 156 千克苹果，下午摘的是上午的 2 倍，全天共摘多少千克？",
+    answer: "468 千克",
+    options: ["468 千克", "312 千克", "314 千克", "158 千克"],
+    explain: "下午是 156 × 2 = 312 千克，全天是 156 + 312 = 468 千克。"
+  },
+  {
+    prompt: "停车场原来有 72 辆车，开走 28 辆，又开来 19 辆，现在有多少辆？",
+    answer: "63 辆",
+    options: ["63 辆", "25 辆", "119 辆", "81 辆"],
+    explain: "先减开走的，再加开来的：72 - 28 + 19 = 63。"
+  },
+  {
+    prompt: "一个正方形花坛边长 16 米，在四周围栏杆，需要多少米栏杆？",
+    answer: "64 米",
+    options: ["64 米", "32 米", "256 米", "48 米"],
+    explain: "正方形周长是边长 × 4：16 × 4 = 64。"
+  },
+  {
+    prompt: "买 5 本笔记本用 35 元，买 9 本同样的笔记本要多少元？",
+    answer: "63 元",
+    options: ["63 元", "44 元", "315 元", "7 元"],
+    explain: "先求单价 35 ÷ 5 = 7 元，再求 9 本：7 × 9 = 63。"
+  },
+  {
+    prompt: "一辆车上午行 128 千米，下午比上午多行 36 千米，全天行多少千米？",
+    answer: "292 千米",
+    options: ["292 千米", "164 千米", "220 千米", "256 千米"],
+    explain: "下午行 128 + 36 = 164 千米，全天 128 + 164 = 292 千米。"
+  },
+  {
+    prompt: "36 个苹果平均放进 4 个袋子，每袋再增加 3 个，现在每袋有多少个？",
+    answer: "12 个",
+    options: ["12 个", "9 个", "15 个", "39 个"],
+    explain: "先平均分：36 ÷ 4 = 9 个；每袋再增加 3 个，所以 9 + 3 = 12。"
+  }
+];
+
+const els = {
+  startScreen: document.querySelector("#startScreen"),
+  quizScreen: document.querySelector("#quizScreen"),
+  resultScreen: document.querySelector("#resultScreen"),
+  modeGrid: document.querySelector("#modeGrid"),
+  scoreText: document.querySelector("#scoreText"),
+  streakText: document.querySelector("#streakText"),
+  roundText: document.querySelector("#roundText"),
+  progressFill: document.querySelector("#progressFill"),
+  modeLabel: document.querySelector("#modeLabel"),
+  roundBig: document.querySelector("#roundBig"),
+  steps: document.querySelector("#steps"),
+  soundButton: document.querySelector("#soundButton"),
+  homeButton: document.querySelector("#homeButton"),
+  hintBox: document.querySelector("#hintBox"),
+  typeTag: document.querySelector("#typeTag"),
+  levelTag: document.querySelector("#levelTag"),
+  skillTag: document.querySelector("#skillTag"),
+  promptText: document.querySelector("#promptText"),
+  sceneBox: document.querySelector("#sceneBox"),
+  optionsBox: document.querySelector("#optionsBox"),
+  feedbackBox: document.querySelector("#feedbackBox"),
+  feedbackText: document.querySelector("#feedbackText"),
+  nextButton: document.querySelector("#nextButton"),
+  finalScore: document.querySelector("#finalScore"),
+  finalRate: document.querySelector("#finalRate"),
+  resultTitle: document.querySelector("#resultTitle"),
+  resultSummary: document.querySelector("#resultSummary"),
+  weakList: document.querySelector("#weakList"),
+  againButton: document.querySelector("#againButton"),
+  resultHomeButton: document.querySelector("#resultHomeButton"),
+};
+
+let soundEnabled = loadSoundPreference();
+let state = createState();
+const soundPlayers = new Map();
+
+function createState() {
+  return {
+    mode: MODES[0],
+    round: 0,
+    score: 0,
+    streak: 0,
+    bestStreak: 0,
+    answered: [],
+    wrong: [],
+    current: null,
+    locked: false,
+  };
+}
+
+function shuffle(items) {
+  const list = [...items];
+  for (let index = list.length - 1; index > 0; index -= 1) {
+    const swap = Math.floor(Math.random() * (index + 1));
+    [list[index], list[swap]] = [list[swap], list[index]];
+  }
+  return list;
+}
+
+function randomItem(items) {
+  return items[Math.floor(Math.random() * items.length)];
+}
+
+function uniqueOptions(answer, distractors) {
+  const answerText = String(answer);
+  const rest = [...new Set(distractors.map(String))]
+    .filter((item) => item !== answerText)
+    .slice(0, 3);
+  return shuffle([answerText, ...rest]);
+}
+
+function startGame(modeId = "mix") {
+  playSound("click");
+  const mode = MODES.find((item) => item.id === modeId) || MODES[0];
+  state = createState();
+  state.mode = mode;
+  els.startScreen.classList.add("hidden");
+  els.resultScreen.classList.add("hidden");
+  els.quizScreen.classList.remove("hidden");
+  nextQuestion();
+}
+
+function nextQuestion() {
+  if (state.round >= ROUND_TOTAL) {
+    finishGame();
+    return;
+  }
+
+  const type = randomItem(state.mode.types);
+  state.current = makeQuestion(type, state.round);
+  state.round += 1;
+  state.locked = false;
+  renderQuestion();
+}
+
+function makeQuestion(type, roundIndex) {
+  if (type === "perimeter") {
+    return makePerimeterQuestion(roundIndex);
+  }
+  if (type === "direction") {
+    return makeDirectionQuestion(roundIndex);
+  }
+  if (type === "pattern") {
+    return makePatternQuestion(roundIndex);
+  }
+  return makeWordQuestion(roundIndex);
+}
+
+function makePerimeterQuestion(roundIndex) {
+  const left = randomItem([6, 7, 8, 9, 10, 12]);
+  const bottom = randomItem([8, 9, 10, 11, 12, 14]);
+  const notchWidth = randomItem([2, 3, 4, 5]);
+  const notchHeight = randomItem([2, 3, 4]);
+  const answer = 2 * (left + bottom);
+  const options = uniqueOptions(`${answer} 厘米`, [
+    `${answer + notchWidth + notchHeight} 厘米`,
+    `${answer - notchWidth - notchHeight} 厘米`,
+    `${left + bottom + notchWidth + notchHeight} 厘米`,
+    `${2 * left + bottom + notchWidth} 厘米`,
+  ]);
+
+  return {
+    type: "组合图形周长",
+    level: roundIndex > 5 ? "提高" : "基础",
+    skill: "缺角 L 形",
+    prompt: "下面是一块 L 形的地，求它的周长。",
+    scene: renderLShape({ left, bottom, notchWidth, notchHeight }),
+    answer: `${answer} 厘米`,
+    options,
+    explain: `这种缺角 L 形可以看成一个长方形缺了一角。缺口宽会补到底边少掉的那段，缺口高会补到右边少掉的那段，所以周长 = 2 ×（底边 ${bottom} + 左边 ${left}）= ${answer} 厘米。`,
+  };
+}
+
+function renderLShape({ left, bottom, notchWidth, notchHeight }) {
+  const x0 = 82;
+  const y0 = 46;
+  const width = 236;
+  const height = 176;
+  const notchW = Math.round((notchWidth / bottom) * width);
+  const notchH = Math.round((notchHeight / left) * height);
+  const x1 = x0 + width - notchW;
+  const y1 = y0 + notchH;
+  const x2 = x0 + width;
+  const y2 = y0 + height;
+  const path = `M${x0} ${y0} H${x1} V${y1} H${x2} V${y2} H${x0} Z`;
+
+  return `
+    <svg viewBox="0 0 420 288" role="img" aria-label="缺角 L 形地">
+      <rect x="8" y="8" width="404" height="272" rx="14" fill="#fffdf3" stroke="rgba(36,49,44,.18)" stroke-width="2"/>
+      <path d="${path}" fill="#e8f0fb" stroke="#347aa4" stroke-width="6" stroke-linejoin="miter"/>
+      <line x1="${x0}" y1="${y0}" x2="${x0}" y2="${y2}" stroke="#24312c" stroke-width="2" stroke-dasharray="5 6" opacity=".22"/>
+      <line x1="${x0}" y1="${y2}" x2="${x2}" y2="${y2}" stroke="#24312c" stroke-width="2" stroke-dasharray="5 6" opacity=".22"/>
+      <text x="${x0 - 36}" y="${(y0 + y2) / 2}" text-anchor="middle" font-size="24" font-weight="900" fill="#24312c" transform="rotate(-90 ${x0 - 36} ${(y0 + y2) / 2})">左边 ${left}</text>
+      <text x="${(x0 + x2) / 2}" y="${y2 + 38}" text-anchor="middle" font-size="24" font-weight="900" fill="#24312c">底边 ${bottom}</text>
+      <text x="${(x1 + x2) / 2 + 8}" y="${y1 - 16}" text-anchor="middle" font-size="20" font-weight="900" fill="#65736d">缺口宽 ${notchWidth}</text>
+      <text x="${x2 + 8}" y="${(y1 + y2) / 2 - 6}" font-size="20" font-weight="900" fill="#65736d">缺口高 ${notchHeight}</text>
+      <text x="210" y="24" text-anchor="middle" font-size="18" font-weight="900" fill="#65736d">周长是 ____ 厘米</text>
+    </svg>
+  `;
+}
+
+function makeDirectionQuestion(roundIndex) {
+  const easyHours = [12, 3, 6, 9];
+  const hardHours = [1, 2, 4, 5, 7, 8, 10, 11];
+  const hour = roundIndex < 2 ? randomItem(easyHours) : randomItem(hardHours);
+  const options = makeHourOptions(hour);
+
+  return {
+    type: "几点钟方向",
+    level: easyHours.includes(hour) ? "基础" : "提高",
+    skill: "钟向 + 方位",
+    prompt: "小旗在小朋友的哪个方向？请选择“几点钟方向 + 方位词”。",
+    scene: renderClockScene(hour),
+    answer: HOUR_LABELS[hour],
+    options,
+    explain: `把小朋友想成钟面中心：上方是 12 点钟方向，也叫北方；右方是 3 点钟方向，也叫东方。小旗落在 ${HOUR_LABELS[hour]}。`,
+  };
+}
+
+function makeHourOptions(hour) {
+  const near = [hour, wrapHour(hour + 1), wrapHour(hour - 1), wrapHour(hour + 3), wrapHour(hour + 6)];
+  const labels = [...new Set(near.map((value) => HOUR_LABELS[value]))];
+  return uniqueOptions(HOUR_LABELS[hour], labels.filter((item) => item !== HOUR_LABELS[hour]));
+}
+
+function wrapHour(hour) {
+  let value = hour;
+  while (value > 12) value -= 12;
+  while (value < 1) value += 12;
+  return value;
+}
+
+function renderClockScene(hour) {
+  const cx = 190;
+  const cy = 162;
+  const r = 118;
+  const angle = (hour % 12) * 30 - 90;
+  const rad = (angle * Math.PI) / 180;
+  const tx = cx + Math.cos(rad) * r;
+  const ty = cy + Math.sin(rad) * r;
+  const marks = Array.from({ length: 12 }, (_, index) => {
+    const a = index * 30 - 90;
+    const rr = (a * Math.PI) / 180;
+    const xA = cx + Math.cos(rr) * 116;
+    const yA = cy + Math.sin(rr) * 116;
+    const xB = cx + Math.cos(rr) * 128;
+    const yB = cy + Math.sin(rr) * 128;
+    return `<line x1="${xA}" y1="${yA}" x2="${xB}" y2="${yB}"/>`;
+  }).join("");
+
+  return `
+    <svg viewBox="0 0 380 338" role="img" aria-label="钟面方向图">
+      <circle cx="${cx}" cy="${cy}" r="128" fill="#fffdf3" stroke="#24312c" stroke-width="4"/>
+      <g stroke="#65736d" stroke-width="4" stroke-linecap="round">${marks}</g>
+      <circle cx="${cx}" cy="${cy}" r="26" fill="#dff3e8" stroke="#24312c" stroke-width="4"/>
+      <text x="${cx}" y="${cy + 7}" text-anchor="middle" font-size="18" font-weight="900" fill="#24312c">我</text>
+      <line x1="${cx}" y1="${cy}" x2="${tx}" y2="${ty}" stroke="#dd6645" stroke-width="6" stroke-linecap="round" stroke-dasharray="8 9"/>
+      <path d="M${tx - 10} ${ty + 22}v-48l46 14-46 14" fill="#e7ad3f" stroke="#24312c" stroke-width="4" stroke-linejoin="round"/>
+      <text x="${cx}" y="322" text-anchor="middle" font-size="17" font-weight="900" fill="#65736d">圆盘不标数字：先想上北、右东、下南、左西</text>
+    </svg>
+  `;
+}
+
+function makePatternQuestion(roundIndex) {
+  const item = PATTERN_BANK[roundIndex % PATTERN_BANK.length];
+  const answer = item.answer;
+  const options = uniqueOptions(answer, [
+    answer + randomItem([1, 2, 3, 4, 5, 6]),
+    Math.max(answer - randomItem([1, 2, 3, 4, 5, 6]), 0),
+    answer * 2,
+    Math.max(Math.floor(answer / 2), 1),
+  ]);
+
+  return {
+    type: "数字找规律",
+    level: roundIndex % 3 === 0 ? "提高" : "基础",
+    skill: "先找变化",
+    prompt: "横线里应该填哪个数？",
+    scene: renderPatternScene(item.seq),
+    answer: String(answer),
+    options,
+    explain: item.rule,
+  };
+}
+
+function renderPatternScene(seq) {
+  const chips = seq.map((value) => `<span style="
+    display:inline-grid;place-items:center;min-width:58px;height:58px;
+    border:3px solid #24312c;border-radius:8px;background:${value === null ? "#f8d9cc" : "#fffdf6"};
+    box-shadow:3px 3px 0 rgba(36,49,44,.12);font-size:26px;font-weight:900;">
+    ${value === null ? "?" : value}
+  </span>`).join("");
+
+  return `<div class="word-scene" style="text-align:center;">${chips}</div>`;
+}
+
+function makeWordQuestion(roundIndex) {
+  const item = WORD_BANK[roundIndex % WORD_BANK.length];
+  return {
+    type: "应用题拆解",
+    level: roundIndex % 2 === 0 ? "基础" : "提高",
+    skill: "先圈问题",
+    prompt: "先读题，再选正确答案。",
+    scene: renderWordScene(item.prompt),
+    answer: item.answer,
+    options: shuffle(item.options),
+    explain: item.explain,
+  };
+}
+
+function renderWordScene(prompt) {
+  const highlighted = prompt.replace(/(\d+)/g, "<em>$1</em>");
+  return `<div class="word-scene">${highlighted}</div>`;
+}
+
+function renderQuestion() {
+  const q = state.current;
+  els.feedbackBox.classList.add("hidden");
+  els.modeLabel.textContent = state.mode.label;
+  els.roundBig.textContent = state.round;
+  els.scoreText.textContent = state.score;
+  els.streakText.textContent = state.streak;
+  els.roundText.textContent = `${state.round}/${ROUND_TOTAL}`;
+  els.progressFill.style.width = `${((state.round - 1) / ROUND_TOTAL) * 100}%`;
+  els.hintBox.textContent = HINTS[activeTypeKey(q.type)] || "先想清楚关系，再选择答案。";
+  els.typeTag.textContent = q.type;
+  els.levelTag.textContent = q.level;
+  els.skillTag.textContent = q.skill;
+  els.promptText.innerHTML = `${q.prompt}<small>${q.skill}</small>`;
+  els.sceneBox.innerHTML = q.scene;
+  els.optionsBox.innerHTML = q.options.map((option) => `
+    <button class="option" type="button" data-value="${escapeAttr(option)}">${option}</button>
+  `).join("");
+  renderSteps();
+}
+
+function activeTypeKey(type) {
+  if (type.includes("周长")) return "perimeter";
+  if (type.includes("方向")) return "direction";
+  if (type.includes("规律")) return "pattern";
+  return "word";
+}
+
+function renderSteps() {
+  const steps = [];
+  for (let i = 0; i < ROUND_TOTAL; i += 1) {
+    const record = state.answered[i];
+    const className = record ? (record.correct ? "step good" : "step bad") : "step";
+    steps.push(`<span class="${className}"></span>`);
+  }
+  els.steps.innerHTML = steps.join("");
+}
+
+function chooseAnswer(value, button) {
+  if (state.locked) return;
+
+  playSound("click");
+  state.locked = true;
+  const q = state.current;
+  const correct = String(value) === String(q.answer);
+  const buttons = [...els.optionsBox.querySelectorAll(".option")];
+
+  buttons.forEach((item) => {
+    item.disabled = true;
+    if (item.dataset.value === String(q.answer)) {
+      item.classList.add("correct");
+    } else if (item === button) {
+      item.classList.add("wrong");
+    } else {
+      item.classList.add("dim");
+    }
+  });
+
+  if (correct) {
+    state.score += 1;
+    state.streak += 1;
+    state.bestStreak = Math.max(state.bestStreak, state.streak);
+    window.setTimeout(() => playSound("correct"), 80);
+    popBurst();
+  } else {
+    state.streak = 0;
+    state.wrong.push({ ...q, choice: value });
+    window.setTimeout(() => playSound("wrong"), 80);
+  }
+
+  state.answered.push({ correct, type: q.type });
+  els.scoreText.textContent = state.score;
+  els.streakText.textContent = state.streak;
+  els.progressFill.style.width = `${(state.round / ROUND_TOTAL) * 100}%`;
+  renderSteps();
+  showFeedback(correct, q, value);
+}
+
+function showFeedback(correct, q, value) {
+  const title = correct ? "答对了" : "这题抓到弱点了";
+  const detail = correct
+    ? q.explain
+    : `你选了“${value}”。正确答案是“${q.answer}”。${q.explain}`;
+  els.feedbackText.innerHTML = `<strong>${title}</strong><br>${detail}`;
+  els.feedbackBox.classList.remove("hidden");
+}
+
+function finishGame() {
+  saveWeakTypes(state.wrong.map((item) => item.type));
+  saveBest(Math.max(loadBest(), state.score));
+  const rate = Math.round((state.score / ROUND_TOTAL) * 100);
+  els.quizScreen.classList.add("hidden");
+  els.resultScreen.classList.remove("hidden");
+  els.finalScore.textContent = `${state.score}/${ROUND_TOTAL}`;
+  els.finalRate.textContent = `正确率 ${rate}%`;
+  els.resultTitle.textContent = rate >= 90 ? "侦探很稳" : rate >= 70 ? "弱点变少了" : "继续专项突破";
+  els.resultSummary.textContent = `本局最长连对 ${state.bestStreak} 题。建议下一局优先练错题最多的专项。`;
+  els.weakList.innerHTML = state.wrong.length
+    ? state.wrong.map((item) => `
+      <div class="weak-item">
+        <strong>${item.type}</strong><br>
+        ${stripHtml(item.prompt)}<br>
+        你选：${item.choice}；正确：${item.answer}<br>
+        ${item.explain}
+      </div>
+    `).join("")
+    : `<div class="weak-item"><strong>本局没有错题。</strong><br>可以切到混合挑战，看看换题型时是否还稳。</div>`;
+  playSound("finale");
+}
+
+function goHome() {
+  playSound("click");
+  els.quizScreen.classList.add("hidden");
+  els.resultScreen.classList.add("hidden");
+  els.startScreen.classList.remove("hidden");
+  state = createState();
+  els.scoreText.textContent = "0";
+  els.streakText.textContent = "0";
+  els.roundText.textContent = `0/${ROUND_TOTAL}`;
+}
+
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  saveSoundPreference();
+  updateSoundButton();
+  if (soundEnabled) playSound("click");
+}
+
+function updateSoundButton() {
+  els.soundButton.textContent = soundEnabled ? "音效：开" : "音效：关";
+  els.soundButton.setAttribute("aria-pressed", String(soundEnabled));
+}
+
+function playSound(name) {
+  if (!soundEnabled || typeof Audio === "undefined") return;
+  const src = SOUND_ASSETS[name];
+  if (!src) return;
+  let player = soundPlayers.get(name);
+  if (!player) {
+    player = new Audio(src);
+    player.preload = "auto";
+    player.volume = name === "finale" ? 0.72 : 0.9;
+    soundPlayers.set(name, player);
+  }
+  try {
+    player.currentTime = 0;
+    const playback = player.play();
+    if (playback && typeof playback.catch === "function") playback.catch(() => {});
+  } catch {
+    // Some browsers block sound until the first tap.
+  }
+}
+
+function popBurst() {
+  const colors = ["#2f8f68", "#347aa4", "#e7ad3f", "#dd6645", "#7160a8"];
+  for (let i = 0; i < 18; i += 1) {
+    const bit = document.createElement("span");
+    const angle = (Math.PI * 2 * i) / 18;
+    const distance = 58 + Math.random() * 48;
+    bit.className = "burst";
+    bit.style.setProperty("--x", `${50 + (Math.random() - 0.5) * 10}vw`);
+    bit.style.setProperty("--y", `${46 + (Math.random() - 0.5) * 10}vh`);
+    bit.style.setProperty("--dx", `${Math.cos(angle) * distance}px`);
+    bit.style.setProperty("--dy", `${Math.sin(angle) * distance}px`);
+    bit.style.setProperty("--color", colors[i % colors.length]);
+    document.body.appendChild(bit);
+    window.setTimeout(() => bit.remove(), 780);
+  }
+}
+
+function stripHtml(value) {
+  return String(value).replace(/<[^>]*>/g, "");
+}
+
+function escapeAttr(value) {
+  return String(value).replace(/"/g, "&quot;");
+}
+
+function loadStore() {
+  try {
+    return JSON.parse(window.localStorage.getItem(STORE_KEY) || "{}");
+  } catch {
+    return {};
+  }
+}
+
+function saveStore(next) {
+  try {
+    window.localStorage.setItem(STORE_KEY, JSON.stringify(next));
+  } catch {
+    // The game still works if local storage is unavailable.
+  }
+}
+
+function loadSoundPreference() {
+  const store = loadStore();
+  return store.soundEnabled === undefined ? true : store.soundEnabled === true;
+}
+
+function saveSoundPreference() {
+  saveStore({ ...loadStore(), soundEnabled });
+}
+
+function loadBest() {
+  const store = loadStore();
+  return Number.isFinite(store.best) ? store.best : 0;
+}
+
+function saveBest(best) {
+  saveStore({ ...loadStore(), best });
+}
+
+function saveWeakTypes(types) {
+  saveStore({ ...loadStore(), weakTypes: types });
+}
+
+updateSoundButton();
+
+els.modeGrid.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-mode]");
+  if (!button) return;
+  startGame(button.dataset.mode);
+});
+
+els.optionsBox.addEventListener("click", (event) => {
+  const button = event.target.closest(".option");
+  if (!button) return;
+  chooseAnswer(button.dataset.value, button);
+});
+
+els.nextButton.addEventListener("click", () => {
+  playSound("click");
+  nextQuestion();
+});
+
+els.soundButton.addEventListener("click", toggleSound);
+els.homeButton.addEventListener("click", goHome);
+els.againButton.addEventListener("click", () => startGame(state.mode.id));
+els.resultHomeButton.addEventListener("click", goHome);
+</script>
+</body>
+</html>
