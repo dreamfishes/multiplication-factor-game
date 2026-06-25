@@ -1,0 +1,1535 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f7f0df">
+<title>三年级语文知识复习小游戏</title>
+<style>
+  :root {
+    color-scheme: light;
+    --paper: #f7f0df;
+    --paper-deep: #eadbb8;
+    --ink: #29251f;
+    --muted: #71675a;
+    --jade: #2f8d78;
+    --jade-soft: #d8eee8;
+    --cinnabar: #c94a38;
+    --cinnabar-soft: #f6d7cb;
+    --gold: #e5a93d;
+    --gold-soft: #f8e4a7;
+    --sky: #4c87a8;
+    --sky-soft: #d9edf2;
+    --plum: #7e4c73;
+    --right: #26855f;
+    --wrong: #bf3d3d;
+    --line: rgba(41, 37, 31, 0.18);
+    --shadow: 0 18px 42px rgba(80, 56, 31, 0.18);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    min-height: 100%;
+    margin: 0;
+  }
+
+  body {
+    color: var(--ink);
+    font-family: "Kaiti SC", "STKaiti", "PingFang SC", "Microsoft YaHei", sans-serif;
+    letter-spacing: 0;
+    background:
+      linear-gradient(120deg, rgba(47, 141, 120, 0.18) 0 15%, transparent 15% 32%, rgba(201, 74, 56, 0.16) 32% 45%, transparent 45%),
+      radial-gradient(circle at 18% 12%, rgba(229, 169, 61, 0.28), transparent 24%),
+      radial-gradient(circle at 84% 18%, rgba(76, 135, 168, 0.22), transparent 28%),
+      linear-gradient(180deg, #fbf7ea 0%, #ecdfbf 100%);
+    overflow-x: hidden;
+  }
+
+  button {
+    min-height: 46px;
+    border: 0;
+    border-radius: 8px;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button:focus-visible {
+    outline: 4px solid rgba(76, 135, 168, 0.35);
+    outline-offset: 3px;
+  }
+
+  .shell {
+    position: relative;
+    width: min(1100px, 100%);
+    min-height: 100dvh;
+    margin: 0 auto;
+    padding: 18px;
+    display: grid;
+    align-items: center;
+    isolation: isolate;
+  }
+
+  .backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .backdrop svg {
+    width: 100%;
+    height: 100%;
+    min-width: 980px;
+    display: block;
+  }
+
+  .cloud {
+    fill: rgba(255, 255, 255, 0.62);
+  }
+
+  .bamboo {
+    fill: none;
+    stroke: rgba(47, 141, 120, 0.26);
+    stroke-linecap: round;
+    stroke-width: 14;
+  }
+
+  .leaf {
+    fill: rgba(47, 141, 120, 0.22);
+  }
+
+  .seal {
+    fill: rgba(201, 74, 56, 0.18);
+  }
+
+  .panel {
+    position: relative;
+    width: 100%;
+    min-height: min(780px, calc(100dvh - 36px));
+    border: 2px solid rgba(41, 37, 31, 0.28);
+    border-radius: 8px;
+    background:
+      linear-gradient(90deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0)),
+      repeating-linear-gradient(0deg, rgba(92, 68, 42, 0.045) 0 1px, transparent 1px 32px),
+      var(--paper);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .panel::before {
+    content: "";
+    position: absolute;
+    inset: 13px;
+    border: 1px solid rgba(41, 37, 31, 0.16);
+    border-radius: 8px;
+    pointer-events: none;
+  }
+
+  .topbar {
+    position: relative;
+    z-index: 1;
+    min-height: 84px;
+    padding: 22px 26px 12px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 14px;
+    align-items: start;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+  }
+
+  .brand-mark {
+    width: 58px;
+    height: 58px;
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    background: var(--cinnabar);
+    color: #fff8ed;
+    display: grid;
+    place-items: center;
+    font-weight: 900;
+    font-size: 30px;
+    box-shadow: 5px 5px 0 rgba(41, 37, 31, 0.18);
+    transform: rotate(-3deg);
+  }
+
+  .eyebrow {
+    margin: 0 0 2px;
+    color: var(--plum);
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  h1,
+  h2 {
+    margin: 0;
+    line-height: 1.12;
+  }
+
+  h1 {
+    font-size: clamp(30px, 5vw, 52px);
+  }
+
+  .scoreboard {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(74px, auto));
+    gap: 8px;
+  }
+
+  .score-pill {
+    border: 1px solid rgba(41, 37, 31, 0.26);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.55);
+    padding: 8px 10px;
+    text-align: center;
+    box-shadow: 3px 3px 0 rgba(41, 37, 31, 0.08);
+  }
+
+  .score-pill span {
+    display: block;
+    color: var(--muted);
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .score-pill strong {
+    display: block;
+    margin-top: 1px;
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-size: 18px;
+    font-weight: 900;
+  }
+
+  .screen {
+    position: relative;
+    z-index: 1;
+    min-height: 600px;
+    padding: 4px 26px 26px;
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  .start-grid {
+    min-height: 560px;
+    display: grid;
+    grid-template-columns: minmax(0, 0.92fr) minmax(320px, 1.08fr);
+    gap: 24px;
+    align-items: center;
+  }
+
+  .scroll-hero {
+    position: relative;
+    min-height: 520px;
+    display: grid;
+    align-content: center;
+    gap: 18px;
+  }
+
+  .hero-art {
+    width: min(360px, 88vw);
+    aspect-ratio: 1;
+    margin: 0 auto;
+    display: block;
+    filter: drop-shadow(0 18px 20px rgba(80, 56, 31, 0.16));
+  }
+
+  .intro-copy {
+    max-width: 430px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .intro-copy h2 {
+    font-size: clamp(28px, 4.6vw, 46px);
+  }
+
+  .intro-copy p {
+    margin: 10px 0 0;
+    color: var(--muted);
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.7;
+  }
+
+  .mode-board {
+    display: grid;
+    gap: 12px;
+  }
+
+  .mode-button {
+    min-height: 100px;
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    background: #fff8e9;
+    padding: 14px 16px;
+    display: grid;
+    grid-template-columns: 52px 1fr auto;
+    gap: 12px;
+    align-items: center;
+    text-align: left;
+    box-shadow: 5px 5px 0 rgba(41, 37, 31, 0.16);
+    transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.2s ease;
+  }
+
+  .mode-button:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 7px 7px 0 rgba(41, 37, 31, 0.14);
+  }
+
+  .mode-button:active {
+    transform: translate(4px, 4px);
+    box-shadow: 1px 1px 0 rgba(41, 37, 31, 0.16);
+  }
+
+  .mode-button:nth-child(2) {
+    background: var(--jade-soft);
+  }
+
+  .mode-button:nth-child(3) {
+    background: var(--sky-soft);
+  }
+
+  .mode-button:nth-child(4) {
+    background: var(--cinnabar-soft);
+  }
+
+  .mode-icon {
+    width: 52px;
+    height: 52px;
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.72);
+    display: grid;
+    place-items: center;
+    color: var(--cinnabar);
+    font-size: 24px;
+    font-weight: 900;
+  }
+
+  .mode-title {
+    display: block;
+    font-size: 24px;
+    font-weight: 900;
+  }
+
+  .mode-detail {
+    display: block;
+    margin-top: 4px;
+    color: var(--muted);
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.45;
+  }
+
+  .mode-arrow {
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+  }
+
+  .progress-line {
+    height: 14px;
+    margin: 0 0 16px;
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.62);
+    overflow: hidden;
+  }
+
+  .progress-line i {
+    display: block;
+    width: 0;
+    height: 100%;
+    background: linear-gradient(90deg, var(--jade), var(--gold), var(--cinnabar));
+    transition: width 0.28s ease;
+  }
+
+  .quiz-layout {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 18px;
+    align-items: stretch;
+  }
+
+  .side-panel,
+  .question-panel {
+    border: 2px solid rgba(41, 37, 31, 0.32);
+    border-radius: 8px;
+    background: rgba(255, 252, 242, 0.82);
+    box-shadow: 5px 5px 0 rgba(41, 37, 31, 0.1);
+  }
+
+  .side-panel {
+    min-height: 430px;
+    padding: 18px;
+    display: grid;
+    align-content: start;
+    gap: 14px;
+  }
+
+  .round-badge {
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    background: var(--gold-soft);
+    padding: 14px;
+    text-align: center;
+  }
+
+  .round-badge span {
+    display: block;
+    color: var(--muted);
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  .round-badge strong {
+    display: block;
+    margin-top: 4px;
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-size: 30px;
+    font-weight: 900;
+  }
+
+  .mini-map {
+    display: grid;
+    gap: 8px;
+  }
+
+  .mini-step {
+    height: 12px;
+    border: 1px solid rgba(41, 37, 31, 0.28);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.65);
+  }
+
+  .mini-step.done {
+    background: var(--jade);
+  }
+
+  .mini-step.wrong {
+    background: var(--wrong);
+  }
+
+  .quote-box {
+    margin-top: auto;
+    border-left: 5px solid var(--cinnabar);
+    background: rgba(255, 255, 255, 0.52);
+    padding: 12px 12px 12px 14px;
+    color: var(--muted);
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.65;
+  }
+
+  .question-panel {
+    min-height: 430px;
+    padding: clamp(18px, 3vw, 34px);
+    display: grid;
+    grid-template-rows: auto auto 1fr auto;
+    gap: 16px;
+  }
+
+  .question-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .tag {
+    border: 1px solid rgba(41, 37, 31, 0.26);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.7);
+    padding: 5px 10px;
+    color: var(--muted);
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  .tag.type {
+    color: #fff;
+    background: var(--plum);
+    border-color: var(--plum);
+  }
+
+  .question-text {
+    min-height: 96px;
+    display: flex;
+    align-items: center;
+    font-size: clamp(30px, 5vw, 54px);
+    font-weight: 900;
+    line-height: 1.24;
+  }
+
+  .question-text small {
+    display: block;
+    margin-top: 8px;
+    color: var(--muted);
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    align-content: center;
+  }
+
+  .option {
+    min-height: 84px;
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    background: #fffdf6;
+    padding: 12px;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    font-size: clamp(21px, 3.3vw, 34px);
+    font-weight: 900;
+    line-height: 1.18;
+    box-shadow: 4px 4px 0 rgba(41, 37, 31, 0.16);
+    transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.15s ease;
+  }
+
+  .option small {
+    display: block;
+    margin-top: 4px;
+    color: var(--muted);
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .option:hover:not(:disabled) {
+    transform: translate(-1px, -1px);
+  }
+
+  .option:active:not(:disabled) {
+    transform: translate(3px, 3px);
+    box-shadow: 1px 1px 0 rgba(41, 37, 31, 0.16);
+  }
+
+  .option.correct {
+    color: #fff;
+    background: var(--right);
+    border-color: #1d674b;
+  }
+
+  .option.wrong {
+    color: #fff;
+    background: var(--wrong);
+    border-color: #862828;
+  }
+
+  .option.dim {
+    opacity: 0.5;
+  }
+
+  .option:disabled {
+    cursor: default;
+  }
+
+  .feedback {
+    min-height: 74px;
+    border: 1px solid rgba(41, 37, 31, 0.22);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.68);
+    padding: 12px 14px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    align-items: center;
+    color: var(--muted);
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-weight: 800;
+    line-height: 1.5;
+  }
+
+  .feedback strong {
+    color: var(--ink);
+  }
+
+  .next-button,
+  .tool-button {
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    background: var(--gold);
+    padding: 0 18px;
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-weight: 900;
+    box-shadow: 3px 3px 0 rgba(41, 37, 31, 0.14);
+  }
+
+  .tool-button {
+    min-height: 42px;
+    background: rgba(255, 255, 255, 0.65);
+    padding: 0 14px;
+  }
+
+  .result-wrap {
+    min-height: 560px;
+    display: grid;
+    grid-template-columns: minmax(260px, 0.86fr) minmax(0, 1.14fr);
+    gap: 24px;
+    align-items: center;
+  }
+
+  .result-seal {
+    min-height: 420px;
+    display: grid;
+    place-items: center;
+    text-align: center;
+  }
+
+  .big-score {
+    width: min(320px, 82vw);
+    aspect-ratio: 1;
+    border: 8px double var(--cinnabar);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.45);
+    display: grid;
+    place-items: center;
+    transform: rotate(-4deg);
+  }
+
+  .big-score strong {
+    display: block;
+    color: var(--cinnabar);
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-size: clamp(56px, 11vw, 102px);
+    line-height: 0.95;
+  }
+
+  .big-score span {
+    display: block;
+    margin-top: 8px;
+    color: var(--muted);
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-size: 18px;
+    font-weight: 900;
+  }
+
+  .result-detail {
+    display: grid;
+    gap: 14px;
+  }
+
+  .result-detail h2 {
+    font-size: clamp(30px, 5vw, 52px);
+  }
+
+  .result-detail p {
+    margin: 0;
+    color: var(--muted);
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1.7;
+  }
+
+  .wrong-list {
+    display: grid;
+    gap: 8px;
+    max-height: 220px;
+    overflow: auto;
+    padding-right: 4px;
+  }
+
+  .wrong-item {
+    border: 1px solid rgba(41, 37, 31, 0.22);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.58);
+    padding: 9px 11px;
+    color: var(--muted);
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.45;
+  }
+
+  .wrong-item strong {
+    color: var(--ink);
+  }
+
+  .result-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 6px;
+  }
+
+  .primary-action {
+    min-width: 152px;
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    background: var(--cinnabar);
+    color: #fff8ed;
+    padding: 0 20px;
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-weight: 900;
+    box-shadow: 4px 4px 0 rgba(41, 37, 31, 0.16);
+  }
+
+  .secondary-action {
+    min-width: 132px;
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.68);
+    padding: 0 18px;
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-weight: 900;
+    box-shadow: 4px 4px 0 rgba(41, 37, 31, 0.12);
+  }
+
+  .burst {
+    position: fixed;
+    left: var(--x);
+    top: var(--y);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color);
+    pointer-events: none;
+    animation: burst 740ms ease-out forwards;
+    z-index: 10;
+  }
+
+  @keyframes burst {
+    from {
+      transform: translate(0, 0) scale(1);
+      opacity: 1;
+    }
+    to {
+      transform: translate(var(--dx), var(--dy)) scale(0.2);
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  @media (max-width: 860px) {
+    .topbar,
+    .start-grid,
+    .quiz-layout,
+    .result-wrap {
+      grid-template-columns: 1fr;
+    }
+
+    .scoreboard {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .side-panel {
+      min-height: auto;
+    }
+
+    .quote-box {
+      margin-top: 0;
+    }
+
+    .mini-map {
+      grid-template-columns: repeat(12, 1fr);
+    }
+  }
+
+  @media (max-width: 560px) {
+    .shell {
+      padding: 10px;
+      align-items: stretch;
+    }
+
+    .panel {
+      min-height: calc(100dvh - 20px);
+    }
+
+    .topbar {
+      padding: 18px 18px 8px;
+    }
+
+    .screen {
+      min-height: auto;
+      padding: 4px 18px 20px;
+    }
+
+    .brand-mark {
+      width: 50px;
+      height: 50px;
+      font-size: 25px;
+    }
+
+    .mode-button {
+      grid-template-columns: 44px 1fr;
+      min-height: 92px;
+    }
+
+    .mode-arrow {
+      display: none;
+    }
+
+    .mode-icon {
+      width: 44px;
+      height: 44px;
+      font-size: 21px;
+    }
+
+    .mode-title {
+      font-size: 21px;
+    }
+
+    .options {
+      grid-template-columns: 1fr;
+    }
+
+    .question-text {
+      min-height: 76px;
+    }
+
+    .feedback {
+      grid-template-columns: 1fr;
+    }
+
+    .next-button {
+      width: 100%;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="backdrop" aria-hidden="true">
+  <svg viewBox="0 0 1200 760" focusable="false">
+    <path class="cloud" d="M86 128c28-42 82-34 98 8 42-22 92 2 96 48H42c4-32 20-50 44-56z"/>
+    <path class="cloud" d="M962 116c30-48 94-38 112 10 46-26 100 4 104 54H904c6-34 26-55 58-64z"/>
+    <path class="bamboo" d="M90 720C112 540 124 330 106 80"/>
+    <path class="bamboo" d="M1110 732c-38-206-42-430-10-640"/>
+    <path class="leaf" d="M114 212c78-42 134-24 176 18-82 14-132 12-176-18z"/>
+    <path class="leaf" d="M1064 292c-92-32-148-8-184 42 92 4 146-8 184-42z"/>
+    <circle class="seal" cx="238" cy="610" r="118"/>
+    <circle class="seal" cx="970" cy="568" r="86"/>
+  </svg>
+</div>
+
+<main class="shell">
+  <section class="panel" aria-label="三年级语文知识复习小游戏">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">语</div>
+        <div>
+          <p class="eyebrow">三年级下册知识点</p>
+          <h1>语文星桥</h1>
+        </div>
+      </div>
+      <div class="scoreboard" aria-label="成绩">
+        <div class="score-pill"><span>得分</span><strong id="scoreText">0</strong></div>
+        <div class="score-pill"><span>连对</span><strong id="streakText">0</strong></div>
+        <div class="score-pill"><span>题目</span><strong id="roundText">0/12</strong></div>
+      </div>
+    </header>
+
+    <section class="screen" id="startScreen">
+      <div class="start-grid">
+        <div class="scroll-hero">
+          <svg class="hero-art" viewBox="0 0 360 360" role="img" aria-label="书卷和星桥">
+            <defs>
+              <linearGradient id="paperGrad" x1="0" x2="1" y1="0" y2="1">
+                <stop stop-color="#fff9e9"/>
+                <stop offset="1" stop-color="#ecd9a9"/>
+              </linearGradient>
+            </defs>
+            <path d="M76 82h210c16 0 30 14 30 30v144c0 16-14 30-30 30H76c-16 0-30-14-30-30V112c0-16 14-30 30-30z" fill="url(#paperGrad)" stroke="#29251f" stroke-width="5"/>
+            <path d="M98 120h156M98 156h120M98 192h146M98 228h92" stroke="#7e4c73" stroke-width="8" stroke-linecap="round"/>
+            <path d="M56 280c66-42 168-42 244 0" fill="none" stroke="#2f8d78" stroke-width="13" stroke-linecap="round"/>
+            <path d="M90 282c34-18 70-22 110-12" fill="none" stroke="#e5a93d" stroke-width="10" stroke-linecap="round"/>
+            <circle cx="282" cy="96" r="30" fill="#c94a38"/>
+            <text x="282" y="106" text-anchor="middle" font-size="27" font-weight="900" fill="#fff8ed">练</text>
+            <path d="M56 78l18 18M306 62l-18 22M42 214l22-8M318 226l-22-8" stroke="#e5a93d" stroke-width="8" stroke-linecap="round"/>
+          </svg>
+          <div class="intro-copy">
+            <h2>过桥答题，收集星印</h2>
+            <p>每局 12 题，答错的知识点会在结算页留下复习记录。</p>
+          </div>
+        </div>
+        <div class="mode-board" id="modeBoard">
+          <button class="mode-button" type="button" data-mode="all">
+            <span class="mode-icon">全</span>
+            <span>
+              <span class="mode-title">全册混合</span>
+              <span class="mode-detail">字音、字词、近反义词、搭配、积累</span>
+            </span>
+            <span class="mode-arrow">›</span>
+          </button>
+          <button class="mode-button" type="button" data-mode="sound">
+            <span class="mode-icon">音</span>
+            <span>
+              <span class="mode-title">读音小关</span>
+              <span class="mode-detail">易错字音、多音字、同音字</span>
+            </span>
+            <span class="mode-arrow">›</span>
+          </button>
+          <button class="mode-button" type="button" data-mode="word">
+            <span class="mode-icon">词</span>
+            <span>
+              <span class="mode-title">词语小关</span>
+              <span class="mode-detail">形近字、近义词、反义词、词语搭配</span>
+            </span>
+            <span class="mode-arrow">›</span>
+          </button>
+          <button class="mode-button" type="button" data-mode="collect">
+            <span class="mode-icon">积</span>
+            <span>
+              <span class="mode-title">积累小关</span>
+              <span class="mode-detail">ABAC、AABB、日积月累、常识积累</span>
+            </span>
+            <span class="mode-arrow">›</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen hidden" id="quizScreen">
+      <div class="progress-line" aria-hidden="true"><i id="progressFill"></i></div>
+      <div class="quiz-layout">
+        <aside class="side-panel">
+          <div class="round-badge">
+            <span id="modeLabel">全册混合</span>
+            <strong id="roundBig">1</strong>
+          </div>
+          <div class="mini-map" id="miniMap" aria-label="答题记录"></div>
+          <button class="tool-button" type="button" id="speakButton" aria-label="朗读当前题目">朗读</button>
+          <button class="tool-button" type="button" id="soundButton" aria-pressed="true">音效：开</button>
+          <button class="tool-button" type="button" id="backButton">换关卡</button>
+          <div class="quote-box" id="quoteBox">见善则迁，有过则改。</div>
+        </aside>
+
+        <section class="question-panel" aria-live="polite">
+          <div class="question-meta">
+            <span class="tag type" id="typeTag">字音</span>
+            <span class="tag" id="unitTag">第一单元</span>
+            <span class="tag" id="levelTag">基础</span>
+          </div>
+          <div class="question-text" id="questionText"></div>
+          <div class="options" id="optionsBox"></div>
+          <div class="feedback hidden" id="feedbackBox">
+            <div id="feedbackText"></div>
+            <button class="next-button" type="button" id="nextButton">下一题</button>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section class="screen hidden" id="resultScreen">
+      <div class="result-wrap">
+        <div class="result-seal">
+          <div class="big-score">
+            <div>
+              <strong id="finalScore">0</strong>
+              <span id="finalRate">正确率 0%</span>
+            </div>
+          </div>
+        </div>
+        <div class="result-detail">
+          <p class="eyebrow">本局完成</p>
+          <h2 id="resultTitle">星桥通关</h2>
+          <p id="resultSummary">再来一局可以继续练习错题。</p>
+          <div class="wrong-list" id="wrongList"></div>
+          <div class="result-actions">
+            <button class="primary-action" type="button" id="againButton">再练一局</button>
+            <button class="secondary-action" type="button" id="homeButton">回到关卡</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </section>
+</main>
+
+<script>
+const ROUND_TOTAL = 12;
+const STORE_KEY = "grade3-chinese-review-v1";
+const SOUND_ASSETS = {
+  click: "../点击答案音效.mp3",
+  correct: "../答对音效.mp3",
+  wrong: "../答错音效.mp3",
+  finale: "../最后结算庆祝.mp3",
+};
+
+const MODES = [
+  { id: "all", title: "全册混合", detail: "字音、字词、近反义词、搭配、积累", mark: "全", filter: () => true },
+  { id: "sound", title: "读音小关", detail: "易错字音、多音字、同音字", mark: "音", filter: (q) => ["易错字音", "多音字", "同音字"].includes(q.type) },
+  { id: "word", title: "词语小关", detail: "形近字、近义词、反义词、词语搭配", mark: "词", filter: (q) => ["形近字", "近义词", "反义词", "词语搭配"].includes(q.type) },
+  { id: "collect", title: "积累小关", detail: "ABAC、AABB、日积月累、常识积累", mark: "积", filter: (q) => ["词语积累", "日积月累"].includes(q.type) },
+];
+
+const QUOTES = [
+  "见善则迁，有过则改。",
+  "过而不改，是谓过矣。",
+  "人谁无过？过而能改，善莫大焉。",
+  "兵来将挡，水来土掩。",
+  "眼见为实，耳听为虚。",
+  "近朱者赤，近墨者黑。"
+];
+
+const QUESTIONS = [
+  q(1, "易错字音", "基础", "“纤细”的“纤”读什么？", "xiān", ["xiān", "qiān", "xīn", "jiān"], "纤细读 xiān xì。"),
+  q(1, "易错字音", "基础", "“河豚”的“豚”读什么？", "tún", ["tún", "zhú", "tǔn", "táng"], "河豚读 hé tún。"),
+  q(1, "多音字", "提高", "“曾祖”的“曾”读什么？", "zēng", ["zēng", "céng", "zhēng", "cēng"], "曾祖读 zēng zǔ；曾经读 céng jīng。"),
+  q(1, "多音字", "提高", "“挨近”的“挨”读什么？", "āi", ["āi", "ái", "ài", "ǎi"], "挨近读 āi jìn；挨打读 ái dǎ。"),
+  q(1, "多音字", "提高", "“给予”的“给”读什么？", "jǐ", ["jǐ", "gěi", "qǐ", "jí"], "给予读 jǐ yǔ；给力读 gěi lì。"),
+  q(1, "形近字", "基础", "哪个词语用的是“偶”？", "偶尔", ["偶尔", "遇见", "沉重", "试卷"], "偶尔的“偶”和遇见的“遇”是形近字。"),
+  q(1, "近义词", "基础", "“聚拢”的近义词是？", "聚集", ["聚集", "分散", "停止", "偶尔"], "聚拢和聚集都表示合到一起。"),
+  q(1, "反义词", "基础", "“停止”的反义词是？", "继续", ["继续", "结束", "暂停", "停留"], "停止和继续是一组反义词。"),
+  q(1, "词语搭配", "基础", "补全搭配：____的天空", "旷亮无比", ["旷亮无比", "剪刀似", "嫩黄", "如毛"], "PDF 中的搭配是“旷亮无比的天空”。"),
+  q(1, "词语搭配", "基础", "补全搭配：____的羽毛", "乌黑", ["乌黑", "光彩夺目", "伶俐可爱", "纤细"], "PDF 中的搭配是“乌黑的羽毛”。"),
+  q(1, "词语搭配", "基础", "补全搭配：____的电线", "纤细", ["纤细", "剪刀似", "嫩黄", "如毛"], "PDF 中的搭配是“纤细的电线”。"),
+  q(1, "词语积累", "提高", "“波光粼粼”属于哪种结构？", "ABCC", ["ABCC", "AABC", "AABB", "ABAC"], "“波光粼粼”是 ABCC 式词语。"),
+  q(1, "日积月累", "提高", "“江南好，风景旧曾谙”出自哪首词？", "《忆江南》", ["《忆江南》", "《滁州西涧》", "《大林寺桃花》", "《论语》"], "这是白居易《忆江南》中的句子。"),
+
+  q(2, "易错字音", "基础", "“耕种”的“耕”读什么？", "gēng", ["gēng", "gèn", "jīng", "gěng"], "耕种读 gēng zhòng。"),
+  q(2, "易错字音", "基础", "“驯良”的“驯”读什么？", "xùn", ["xùn", "xún", "shùn", "chuān"], "驯良读 xùn liáng。"),
+  q(2, "多音字", "提高", "“模样”的“模”读什么？", "mú", ["mú", "mó", "mǔ", "mù"], "模样读 mú yàng；模仿读 mó fǎng。"),
+  q(2, "多音字", "提高", "“相册”的“相”读什么？", "xiàng", ["xiàng", "xiāng", "xiǎng", "shàng"], "相册读 xiàng cè；相信读 xiāng xìn。"),
+  q(2, "多音字", "提高", "“匀称”的“称”读什么？", "chèn", ["chèn", "chēng", "chèng", "cèn"], "匀称读 yún chèn；称赞读 chēng zàn。"),
+  q(2, "形近字", "基础", "哪个词语用的是“狼”？", "狼狗", ["狼狗", "狠心", "植株", "珍珠"], "狼狗的“狼”和狠心的“狠”是形近字。"),
+  q(2, "近义词", "基础", "“忠诚”的近义词是？", "忠实", ["忠实", "背离", "犹豫", "暴躁"], "忠诚和忠实意思相近。"),
+  q(2, "近义词", "基础", "“驯良”的近义词是？", "驯顺", ["驯顺", "凶恶", "迟钝", "疲劳"], "驯良和驯顺都表示温和顺从。"),
+  q(2, "反义词", "基础", "“犹豫”的反义词是？", "果断", ["果断", "迟疑", "悠闲", "疲乏"], "犹豫和果断是一组反义词。"),
+  q(2, "反义词", "基础", "“温和”的反义词是？", "暴躁", ["暴躁", "驯顺", "疲乏", "悠闲"], "温和和暴躁是一组反义词。"),
+  q(2, "词语搭配", "基础", "补全搭配：____的鹿角", "精美别致", ["精美别致", "凶狠", "匀称", "奔流不息"], "PDF 中的搭配是“精美别致的鹿角”。"),
+  q(2, "词语积累", "提高", "“源源不断”属于哪种结构？", "AABC", ["AABC", "ABCC", "AABB", "无X无X"], "“源源不断”是 AABC 式词语。"),
+  q(2, "词语积累", "提高", "“无忧无虑”属于哪种结构？", "无X无X", ["无X无X", "AABB", "ABCC", "一X一X"], "“无忧无虑”是“无X无X”式词语。"),
+
+  q(3, "易错字音", "基础", "“特殊”的“殊”读什么？", "shū", ["shū", "sū", "zhū", "chū"], "特殊读 tè shū。"),
+  q(3, "易错字音", "基础", "“大概”的“概”读什么？", "gài", ["gài", "kǎi", "gǎi", "gāi"], "大概读 dà gài。"),
+  q(3, "易错字音", "基础", "“钳子”的“钳”读什么？", "qián", ["qián", "gān", "jiān", "qīn"], "钳子读 qián zi。"),
+  q(3, "多音字", "提高", "“差异”的“差”读什么？", "chā", ["chā", "chà", "chāi", "cī"], "差异读 chā yì；差劲读 chà jìn。"),
+  q(3, "多音字", "提高", "“出差”的“差”读什么？", "chāi", ["chāi", "chā", "chà", "cī"], "出差读 chū chāi。"),
+  q(3, "形近字", "基础", "哪个词语用的是“检”？", "检查", ["检查", "惊险", "测验", "安静"], "检查的“检”和惊险的“险”、测验的“验”是形近字。"),
+  q(3, "近义词", "基础", "“宁静”的近义词是？", "安静", ["安静", "陌生", "危险", "攻击"], "宁静和安静意思相近。"),
+  q(3, "近义词", "基础", "“推测”的近义词是？", "推断", ["推断", "验证", "减少", "阻力"], "推测和推断意思相近。"),
+  q(3, "反义词", "基础", "“危险”的反义词是？", "安全", ["安全", "危急", "特殊", "普通"], "危险和安全是一组反义词。"),
+  q(3, "反义词", "基础", "“攻击”的反义词是？", "防守", ["防守", "利用", "后退", "爬行"], "攻击和防守是一组反义词。"),
+  q(3, "词语积累", "提高", "“多种多样”属于哪种结构？", "ABAC", ["ABAC", "ABCC", "AABC", "AABB"], "“多种多样”是 ABAC 式词语。"),
+  q(3, "词语积累", "提高", "哪个词语可以形容声音小？", "窃窃私语", ["窃窃私语", "人山人海", "井井有条", "无边无际"], "PDF 中用“窃窃私语”积累描写声音小的词。"),
+  q(3, "日积月累", "提高", "“独怜幽草涧边生，上有黄鹂深树鸣”出自？", "《滁州西涧》", ["《滁州西涧》", "《忆江南》", "《大林寺桃花》", "《左传》"], "这是韦应物《滁州西涧》中的句子。"),
+
+  q(4, "易错字音", "基础", "“屠苏”的“屠”读什么？", "tú", ["tú", "dǔ", "tǔ", "zhě"], "屠苏读 tú sū。"),
+  q(4, "易错字音", "基础", "“粗糙”的“糙”读什么？", "cāo", ["cāo", "zào", "cào", "chāo"], "粗糙读 cū cāo。"),
+  q(4, "易错字音", "基础", "“投掷”的“掷”读什么？", "zhì", ["zhì", "zì", "zhí", "chì"], "投掷读 tóu zhì。"),
+  q(4, "多音字", "提高", "“积累”的“累”读什么？", "lěi", ["lěi", "lèi", "léi", "lēi"], "积累读 jī lěi；劳累读 láo lèi。"),
+  q(4, "多音字", "提高", "“前爪”的“爪”读什么？", "zhǎo", ["zhǎo", "zhuǎ", "zǎo", "cháo"], "前爪读 qián zhǎo；爪子读 zhuǎ zi。"),
+  q(4, "多音字", "提高", "“一乘轿子”的“乘”读什么？", "shèng", ["shèng", "chéng", "shēng", "chèng"], "一乘轿子读 yí shèng jiào zi；乘法读 chéng fǎ。"),
+  q(4, "形近字", "基础", "哪个词语用的是“历”？", "历史", ["历史", "厉害", "大约", "钓鱼"], "历史的“历”和厉害的“厉”是形近字。"),
+  q(4, "近义词", "基础", "“创造”的近义词是？", "发明", ["发明", "删除", "浪费", "粗糙"], "创造和发明意思相近。"),
+  q(4, "近义词", "基础", "“闻名”的近义词是？", "著名", ["著名", "便宜", "笨重", "光滑"], "闻名和著名意思相近。"),
+  q(4, "反义词", "基础", "“笨重”的反义词是？", "轻便", ["轻便", "粗糙", "浪费", "删除"], "笨重和轻便是一组反义词。"),
+  q(4, "反义词", "基础", "“粗糙”的反义词是？", "光滑", ["光滑", "笨重", "节省", "减少"], "粗糙和光滑是一组反义词。"),
+  q(4, "词语搭配", "基础", "补全搭配：____的街市", "热闹", ["热闹", "形态各异", "名扬中外", "精美"], "PDF 中的搭配是“热闹的街市”。"),
+  q(4, "日积月累", "提高", "“文房四宝”是？", "笔墨纸砚", ["笔墨纸砚", "琴棋书画", "望闻问切", "梅兰竹菊"], "文房四宝：笔墨纸砚。"),
+  q(4, "日积月累", "提高", "“雅人四好”是？", "琴棋书画", ["琴棋书画", "笔墨纸砚", "望闻问切", "柴米油盐"], "雅人四好：琴棋书画。"),
+  q(4, "日积月累", "提高", "“中医四诊”是？", "望闻问切", ["望闻问切", "琴棋书画", "笔墨纸砚", "风花雪月"], "中医四诊：望、闻、问、切。"),
+
+  q(5, "易错字音", "基础", "“萝卜”的“卜”读什么？", "bo", ["bo", "bǔ", "pú", "bō"], "萝卜读 luó bo。"),
+  q(5, "易错字音", "基础", "“晾晒”的“晾”读什么？", "liàng", ["liàng", "liáng", "jīng", "làng"], "晾晒读 liàng shài。"),
+  q(5, "易错字音", "基础", "“香肠”的“肠”读什么？", "cháng", ["cháng", "cáng", "chǎng", "táng"], "香肠读 xiāng cháng。"),
+  q(5, "同音字", "基础", "读音“duàn”对应哪组词？", "段落、断裂", ["段落、断裂", "形状、壮大", "克服、客人", "湖面、胡说"], "PDF 中 duàn 的例词有“段落、断裂”。"),
+  q(5, "同音字", "基础", "读音“kè”对应哪组词？", "克服、客人、刻苦", ["克服、客人、刻苦", "段落、断裂", "壮大、撞击", "浓厚、农场"], "PDF 中 kè 的例词有“克服、客人、刻苦”。"),
+  q(5, "形近字", "基础", "哪个词语用的是“湖”？", "湖面", ["湖面", "胡说", "阻力", "姐姐"], "湖面用“湖”；胡说用“胡”。"),
+  q(5, "近义词", "基础", "“浓密”的近义词是？", "稠密", ["稠密", "稀疏", "方便", "困难"], "浓密和稠密意思相近。"),
+  q(5, "近义词", "基础", "“想念”的近义词是？", "思念", ["思念", "失望", "麻烦", "继续"], "想念和思念意思相近。"),
+  q(5, "反义词", "基础", "“容易”的反义词是？", "困难", ["困难", "轻易", "连续", "放心"], "容易和困难是一组反义词。"),
+  q(5, "反义词", "基础", "“继续”的反义词是？", "间断", ["间断", "连续", "放心", "方便"], "继续和间断是一组反义词。"),
+  q(5, "词语搭配", "基础", "补全搭配：____的果酱", "甜甜", ["甜甜", "浓密", "香喷喷", "轻轻"], "PDF 中的搭配是“甜甜的果酱”。"),
+  q(5, "词语搭配", "基础", "补全搭配：____的饭菜", "香喷喷", ["香喷喷", "甜甜", "浓密", "轻轻"], "PDF 中的搭配是“香喷喷的饭菜”。"),
+  q(5, "词语积累", "提高", "“明明白白”属于哪种结构？", "AABB", ["AABB", "ABCC", "AABC", "一X一X"], "“明明白白”是 AABB 式词语。"),
+
+  q(6, "易错字音", "基础", "“染色”的“染”读什么？", "rǎn", ["rǎn", "rán", "yǎn", "ràng"], "染色读 rǎn sè。"),
+  q(6, "易错字音", "基础", "“剩下”的“剩”读什么？", "shèng", ["shèng", "chéng", "shēng", "sèng"], "剩下读 shèng xià。"),
+  q(6, "易错字音", "基础", "“瞭望”的“瞭”读什么？", "liào", ["liào", "liáo", "liǎo", "liāo"], "瞭望读 liào wàng。"),
+  q(6, "多音字", "提高", "“和弄”的“和”读什么？", "huò", ["huò", "hé", "huó", "hè"], "和弄读 huò nong；和平读 hé píng。"),
+  q(6, "多音字", "提高", "“应和”的“和”读什么？", "hè", ["hè", "hé", "huó", "huò"], "应和读 yìng hè。"),
+  q(6, "形近字", "基础", "哪个词语用的是“诚”？", "真诚", ["真诚", "城市", "拨打", "拔草"], "真诚用“诚”；城市用“城”。"),
+  q(6, "近义词", "基础", "“可惜”的近义词是？", "惋惜", ["惋惜", "严寒", "干燥", "俯视"], "可惜和惋惜意思相近。"),
+  q(6, "近义词", "基础", "“自由”的近义词是？", "自在", ["自在", "守信", "潮湿", "仰望"], "自由和自在意思相近。"),
+  q(6, "反义词", "基础", "“潮湿”的反义词是？", "干燥", ["干燥", "湿润", "守信", "俯视"], "潮湿和干燥是一组反义词。"),
+  q(6, "反义词", "基础", "“失信”的反义词是？", "守信", ["守信", "真诚", "自在", "湿润"], "失信和守信是一组反义词。"),
+  q(6, "词语积累", "提高", "“笑哈哈”属于哪种结构？", "ABB", ["ABB", "AABB", "ABAC", "AABC"], "“笑哈哈”是 ABB 式词语。"),
+  q(6, "日积月累", "提高", "“见善则迁，有过则改”出自？", "《周易》", ["《周易》", "《论语》", "《左传》", "《孟子》"], "PDF 的日积月累中标注为《周易》。"),
+  q(6, "日积月累", "提高", "“过而不改，是谓过矣”出自？", "《论语》", ["《论语》", "《周易》", "《左传》", "《大学》"], "PDF 的日积月累中标注为《论语》。"),
+  q(6, "日积月累", "提高", "“人谁无过？过而能改，善莫大焉”出自？", "《左传》", ["《左传》", "《论语》", "《周易》", "《诗经》"], "PDF 的日积月累中标注为《左传》。"),
+
+  q(7, "易错字音", "基础", "“蔚蓝”的“蔚”读什么？", "wèi", ["wèi", "yù", "wěi", "wēi"], "蔚蓝读 wèi lán。"),
+  q(7, "易错字音", "基础", "“洼地”的“洼”读什么？", "wā", ["wā", "guī", "wá", "wǎ"], "洼地读 wā dì。"),
+  q(7, "多音字", "提高", "“强劲”的“劲”读什么？", "jìng", ["jìng", "jìn", "jīn", "qíng"], "强劲读 qiáng jìng；用劲读 yòng jìn。"),
+  q(7, "形近字", "基础", "哪个词语用的是“镇”？", "镇压", ["镇压", "填写", "传说", "转告"], "镇压用“镇”；填写用“填”。"),
+  q(7, "近义词", "基础", "“镇静”的近义词是？", "镇定", ["镇定", "惊慌", "清楚", "凝结"], "镇静和镇定意思相近。"),
+  q(7, "近义词", "基础", "“昏暗”的近义词是？", "暗淡", ["暗淡", "明亮", "模糊", "清楚"], "昏暗和暗淡意思相近。"),
+  q(7, "反义词", "基础", "“模糊”的反义词是？", "清楚", ["清楚", "暗淡", "惊慌", "凝结"], "模糊和清楚是一组反义词。"),
+  q(7, "反义词", "基础", "“融化”的反义词是？", "凝结", ["凝结", "变动", "明亮", "镇定"], "融化和凝结是一组反义词。"),
+  q(7, "词语积累", "提高", "哪个词语是描写颜色的？", "金灿灿", ["金灿灿", "一模一样", "生命", "刀剑"], "PDF 中的颜色词包括红彤彤、金灿灿等。"),
+  q(7, "词语积累", "提高", "“一模一样”属于哪种结构？", "一X一X", ["一X一X", "AABB", "ABB", "ABCC"], "“一模一样”是“一X一X”式词语。"),
+  q(7, "日积月累", "提高", "“人间四月芳菲尽，山寺桃花始盛开”出自？", "《大林寺桃花》", ["《大林寺桃花》", "《忆江南》", "《滁州西涧》", "《论语》"], "这是白居易《大林寺桃花》中的句子。"),
+
+  q(8, "易错字音", "基础", "“脊背”的“脊”读什么？", "jǐ", ["jǐ", "jí", "jī", "qǐ"], "脊背读 jǐ bèi。"),
+  q(8, "易错字音", "基础", "“咳嗽”的“咳”读什么？", "ké", ["ké", "kǎ", "hāi", "hài"], "咳嗽读 ké sou。"),
+  q(8, "易错字音", "基础", "“告诫”的“诫”读什么？", "jiè", ["jiè", "xiè", "jì", "gài"], "告诫读 gào jiè。"),
+  q(8, "多音字", "提高", "“缝合”的“缝”读什么？", "féng", ["féng", "fèng", "fēng", "fěng"], "缝合读 féng hé；裂缝读 liè fèng。"),
+  q(8, "多音字", "提高", "“旋风”的“旋”读什么？", "xuàn", ["xuàn", "xuán", "quán", "xún"], "旋风读 xuàn fēng；旋转读 xuán zhuǎn。"),
+  q(8, "多音字", "提高", "“涨红”的“涨”读什么？", "zhàng", ["zhàng", "zhǎng", "cháng", "zàng"], "涨红读 zhàng hóng；涨落读 zhǎng luò。"),
+  q(8, "形近字", "基础", "哪个词语用的是“衬”？", "衬衫", ["衬衫", "付钱", "夸奖", "跨过"], "衬衫用“衬”；付钱用“付”。"),
+  q(8, "近义词", "基础", "“适合”的近义词是？", "符合", ["符合", "批评", "羞涩", "动荡"], "适合和符合意思相近。"),
+  q(8, "近义词", "基础", "“夸奖”的近义词是？", "称赞", ["称赞", "批评", "尽责", "自然"], "夸奖和称赞意思相近。"),
+  q(8, "反义词", "基础", "“欢喜”的反义词是？", "悲伤", ["悲伤", "称赞", "甘愿", "自然"], "欢喜和悲伤是一组反义词。"),
+  q(8, "反义词", "基础", "“夸奖”的反义词是？", "批评", ["批评", "称赞", "负责", "惊讶"], "夸奖和批评是一组反义词。"),
+  q(8, "词语积累", "提高", "“大摇大摆”属于哪种结构？", "ABAC", ["ABAC", "AABC", "AABB", "ABCC"], "“大摇大摆”是 ABAC 式词语。"),
+  q(8, "词语积累", "提高", "哪个词语含有反义词？", "走南闯北", ["走南闯北", "各式各样", "大摇大摆", "夸奖称赞"], "走南闯北中有“南”和“北”这组反义词。"),
+  q(8, "日积月累", "提高", "“不入虎穴，焉得虎子”的意思更接近？", "不经历危险，就难以成功", ["不经历危险，就难以成功", "眼见比耳听可靠", "靠近好人会变好", "遇事要灵活应对"], "这句常用来说明不冒风险就难以取得成果。"),
+  q(8, "日积月累", "提高", "“眼见为实，耳听为虚”强调什么？", "亲眼看到更可靠", ["亲眼看到更可靠", "遇事要提前准备", "犯错后要改正", "不同人互相影响"], "这句强调亲眼看见的事实更可靠。"),
+  q(8, "日积月累", "提高", "“近朱者赤，近墨者黑”强调什么？", "环境会影响人", ["环境会影响人", "做事不能拖延", "听到的不可信", "要勇敢进虎穴"], "这句强调接近什么样的人或环境，就容易受到什么影响。")
+];
+
+const els = {
+  startScreen: document.querySelector("#startScreen"),
+  quizScreen: document.querySelector("#quizScreen"),
+  resultScreen: document.querySelector("#resultScreen"),
+  modeBoard: document.querySelector("#modeBoard"),
+  scoreText: document.querySelector("#scoreText"),
+  streakText: document.querySelector("#streakText"),
+  roundText: document.querySelector("#roundText"),
+  roundBig: document.querySelector("#roundBig"),
+  modeLabel: document.querySelector("#modeLabel"),
+  progressFill: document.querySelector("#progressFill"),
+  miniMap: document.querySelector("#miniMap"),
+  quoteBox: document.querySelector("#quoteBox"),
+  typeTag: document.querySelector("#typeTag"),
+  unitTag: document.querySelector("#unitTag"),
+  levelTag: document.querySelector("#levelTag"),
+  questionText: document.querySelector("#questionText"),
+  optionsBox: document.querySelector("#optionsBox"),
+  feedbackBox: document.querySelector("#feedbackBox"),
+  feedbackText: document.querySelector("#feedbackText"),
+  nextButton: document.querySelector("#nextButton"),
+  speakButton: document.querySelector("#speakButton"),
+  soundButton: document.querySelector("#soundButton"),
+  backButton: document.querySelector("#backButton"),
+  finalScore: document.querySelector("#finalScore"),
+  finalRate: document.querySelector("#finalRate"),
+  resultTitle: document.querySelector("#resultTitle"),
+  resultSummary: document.querySelector("#resultSummary"),
+  wrongList: document.querySelector("#wrongList"),
+  againButton: document.querySelector("#againButton"),
+  homeButton: document.querySelector("#homeButton"),
+};
+
+let state = createFreshState();
+let soundEnabled = loadSoundPreference();
+const soundPlayers = new Map();
+
+function q(unit, type, level, prompt, answer, options, explain) {
+  return {
+    id: `${unit}-${type}-${prompt}`,
+    unit,
+    type,
+    level,
+    prompt,
+    answer,
+    options,
+    explain,
+  };
+}
+
+function createFreshState() {
+  return {
+    mode: MODES[0],
+    queue: [],
+    current: null,
+    round: 0,
+    score: 0,
+    streak: 0,
+    bestStreak: 0,
+    answered: [],
+    wrong: [],
+    locked: false,
+  };
+}
+
+function shuffle(list) {
+  const items = [...list];
+  for (let index = items.length - 1; index > 0; index -= 1) {
+    const swap = Math.floor(Math.random() * (index + 1));
+    [items[index], items[swap]] = [items[swap], items[index]];
+  }
+  return items;
+}
+
+function renderModes() {
+  els.modeBoard.innerHTML = MODES.map((mode) => `
+    <button class="mode-button" type="button" data-mode="${mode.id}">
+      <span class="mode-icon">${mode.mark}</span>
+      <span>
+        <span class="mode-title">${mode.title}</span>
+        <span class="mode-detail">${mode.detail}</span>
+      </span>
+      <span class="mode-arrow">›</span>
+    </button>
+  `).join("");
+}
+
+function startGame(modeId = "all") {
+  playSound("click");
+  const mode = MODES.find((item) => item.id === modeId) || MODES[0];
+  const pool = QUESTIONS.filter(mode.filter);
+  const savedWrongIds = loadWrongIds();
+  const wrongFirst = savedWrongIds
+    .map((id) => pool.find((question) => question.id === id))
+    .filter(Boolean);
+  const rest = shuffle(pool.filter((question) => !savedWrongIds.includes(question.id)));
+
+  state = createFreshState();
+  state.mode = mode;
+  state.queue = shuffle([...wrongFirst, ...rest]).slice(0, ROUND_TOTAL);
+  if (state.queue.length < ROUND_TOTAL) {
+    state.queue = shuffle(pool).slice(0, ROUND_TOTAL);
+  }
+
+  els.startScreen.classList.add("hidden");
+  els.resultScreen.classList.add("hidden");
+  els.quizScreen.classList.remove("hidden");
+  nextQuestion();
+}
+
+function nextQuestion() {
+  if (state.round >= ROUND_TOTAL || state.round >= state.queue.length) {
+    finishGame();
+    return;
+  }
+
+  state.current = state.queue[state.round];
+  state.locked = false;
+  state.round += 1;
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const question = state.current;
+  const options = shuffle(question.options);
+
+  els.feedbackBox.classList.add("hidden");
+  els.feedbackText.innerHTML = "";
+  els.modeLabel.textContent = state.mode.title;
+  els.scoreText.textContent = state.score;
+  els.streakText.textContent = state.streak;
+  els.roundText.textContent = `${state.round}/${ROUND_TOTAL}`;
+  els.roundBig.textContent = state.round;
+  els.progressFill.style.width = `${((state.round - 1) / ROUND_TOTAL) * 100}%`;
+  els.quoteBox.textContent = QUOTES[(state.round - 1) % QUOTES.length];
+  els.typeTag.textContent = question.type;
+  els.unitTag.textContent = `第${toChineseNumber(question.unit)}单元`;
+  els.levelTag.textContent = question.level;
+  els.questionText.innerHTML = `${question.prompt}<small>${question.type} · ${question.level}</small>`;
+  els.optionsBox.innerHTML = options.map((option) => `
+    <button class="option" type="button" data-answer="${escapeAttr(option)}">${option}</button>
+  `).join("");
+  renderMiniMap();
+}
+
+function renderMiniMap() {
+  const steps = [];
+  for (let index = 0; index < ROUND_TOTAL; index += 1) {
+    const record = state.answered[index];
+    const className = record ? (record.correct ? "mini-step done" : "mini-step wrong") : "mini-step";
+    steps.push(`<span class="${className}"></span>`);
+  }
+  els.miniMap.innerHTML = steps.join("");
+}
+
+function answerQuestion(choice, button) {
+  if (state.locked) {
+    return;
+  }
+
+  playSound("click");
+  state.locked = true;
+  const question = state.current;
+  const correct = choice === question.answer;
+  const buttons = [...els.optionsBox.querySelectorAll(".option")];
+
+  buttons.forEach((item) => {
+    item.disabled = true;
+    const value = item.dataset.answer;
+    if (value === question.answer) {
+      item.classList.add("correct");
+    } else if (item === button) {
+      item.classList.add("wrong");
+    } else {
+      item.classList.add("dim");
+    }
+  });
+
+  if (correct) {
+    state.score += 1;
+    state.streak += 1;
+    state.bestStreak = Math.max(state.bestStreak, state.streak);
+    window.setTimeout(() => playSound("correct"), 90);
+    popBurst();
+  } else {
+    state.streak = 0;
+    state.wrong.push({ ...question, choice });
+    window.setTimeout(() => playSound("wrong"), 90);
+  }
+
+  state.answered.push({ id: question.id, correct });
+  els.scoreText.textContent = state.score;
+  els.streakText.textContent = state.streak;
+  els.progressFill.style.width = `${(state.round / ROUND_TOTAL) * 100}%`;
+  renderMiniMap();
+  showFeedback(correct, question, choice);
+}
+
+function showFeedback(correct, question, choice) {
+  const title = correct ? "答对了" : "再看一眼";
+  const detail = correct
+    ? question.explain
+    : `你选了“${choice}”。正确答案是“${question.answer}”。${question.explain}`;
+  els.feedbackText.innerHTML = `<strong>${title}</strong><br>${detail}`;
+  els.feedbackBox.classList.remove("hidden");
+}
+
+function finishGame() {
+  saveWrongIds(state.wrong.map((item) => item.id));
+  const best = loadBest();
+  const nextBest = Math.max(best, state.score);
+  saveBest(nextBest);
+
+  const rate = Math.round((state.score / ROUND_TOTAL) * 100);
+  els.quizScreen.classList.add("hidden");
+  els.resultScreen.classList.remove("hidden");
+  els.finalScore.textContent = `${state.score}/${ROUND_TOTAL}`;
+  els.finalRate.textContent = `正确率 ${rate}%`;
+  els.resultTitle.textContent = rate >= 90 ? "星印满满" : rate >= 70 ? "已经过桥" : "继续练习";
+  els.resultSummary.textContent = `最高分 ${nextBest}/${ROUND_TOTAL}，本局最长连对 ${state.bestStreak} 题。`;
+  els.wrongList.innerHTML = state.wrong.length
+    ? state.wrong.map((item) => `
+        <div class="wrong-item">
+          <strong>${item.prompt}</strong><br>
+          你选：${item.choice}；正确：${item.answer}<br>
+          ${item.explain}
+        </div>
+      `).join("")
+    : `<div class="wrong-item"><strong>本局没有错题。</strong><br>可以换一个关卡继续巩固。</div>`;
+  playSound("finale");
+}
+
+function goHome() {
+  playSound("click");
+  stopSpeech();
+  els.quizScreen.classList.add("hidden");
+  els.resultScreen.classList.add("hidden");
+  els.startScreen.classList.remove("hidden");
+  state = createFreshState();
+  els.scoreText.textContent = "0";
+  els.streakText.textContent = "0";
+  els.roundText.textContent = "0/12";
+}
+
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  saveSoundPreference();
+  updateSoundButton();
+  if (soundEnabled) {
+    playSound("click");
+  }
+}
+
+function updateSoundButton() {
+  els.soundButton.textContent = soundEnabled ? "音效：开" : "音效：关";
+  els.soundButton.setAttribute("aria-pressed", String(soundEnabled));
+}
+
+function playSound(name) {
+  if (!soundEnabled || typeof Audio === "undefined") {
+    return;
+  }
+
+  const src = SOUND_ASSETS[name];
+  if (!src) {
+    return;
+  }
+
+  let player = soundPlayers.get(name);
+  if (!player) {
+    player = new Audio(src);
+    player.preload = "auto";
+    player.volume = name === "finale" ? 0.74 : 0.9;
+    soundPlayers.set(name, player);
+  }
+
+  try {
+    player.currentTime = 0;
+    const playback = player.play();
+    if (playback && typeof playback.catch === "function") {
+      playback.catch(() => {});
+    }
+  } catch {
+    // Browsers may block sound before the first user gesture.
+  }
+}
+
+function speakCurrent() {
+  if (!state.current || !("speechSynthesis" in window)) {
+    return;
+  }
+  stopSpeech();
+  const text = `${state.current.prompt}。选项：${state.current.options.join("，")}。`;
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "zh-CN";
+  utterance.rate = 0.88;
+  window.speechSynthesis.speak(utterance);
+}
+
+function stopSpeech() {
+  if ("speechSynthesis" in window) {
+    window.speechSynthesis.cancel();
+  }
+}
+
+function popBurst() {
+  const colors = ["#c94a38", "#2f8d78", "#e5a93d", "#4c87a8", "#7e4c73"];
+  for (let index = 0; index < 18; index += 1) {
+    const bit = document.createElement("span");
+    const angle = (Math.PI * 2 * index) / 18;
+    const distance = 58 + Math.random() * 50;
+    bit.className = "burst";
+    bit.style.setProperty("--x", `${50 + (Math.random() - 0.5) * 10}vw`);
+    bit.style.setProperty("--y", `${46 + (Math.random() - 0.5) * 10}vh`);
+    bit.style.setProperty("--dx", `${Math.cos(angle) * distance}px`);
+    bit.style.setProperty("--dy", `${Math.sin(angle) * distance}px`);
+    bit.style.setProperty("--color", colors[index % colors.length]);
+    document.body.appendChild(bit);
+    window.setTimeout(() => bit.remove(), 760);
+  }
+}
+
+function toChineseNumber(value) {
+  return ["零", "一", "二", "三", "四", "五", "六", "七", "八"][value] || value;
+}
+
+function escapeAttr(value) {
+  return String(value).replace(/"/g, "&quot;");
+}
+
+function loadWrongIds() {
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(STORE_KEY) || "{}");
+    return Array.isArray(stored.wrongIds) ? stored.wrongIds : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveWrongIds(wrongIds) {
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(STORE_KEY) || "{}");
+    window.localStorage.setItem(STORE_KEY, JSON.stringify({ ...stored, wrongIds }));
+  } catch {
+    // The game still works without local storage.
+  }
+}
+
+function loadBest() {
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(STORE_KEY) || "{}");
+    return Number.isFinite(stored.best) ? stored.best : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function saveBest(best) {
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(STORE_KEY) || "{}");
+    window.localStorage.setItem(STORE_KEY, JSON.stringify({ ...stored, best }));
+  } catch {
+    // The game still works without local storage.
+  }
+}
+
+function loadSoundPreference() {
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(STORE_KEY) || "{}");
+    return stored.soundEnabled === undefined ? true : stored.soundEnabled === true;
+  } catch {
+    return true;
+  }
+}
+
+function saveSoundPreference() {
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(STORE_KEY) || "{}");
+    window.localStorage.setItem(STORE_KEY, JSON.stringify({ ...stored, soundEnabled }));
+  } catch {
+    // Sound preference is optional.
+  }
+}
+
+renderModes();
+updateSoundButton();
+
+els.modeBoard.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-mode]");
+  if (!button) {
+    return;
+  }
+  startGame(button.dataset.mode);
+});
+
+els.optionsBox.addEventListener("click", (event) => {
+  const button = event.target.closest(".option");
+  if (!button) {
+    return;
+  }
+  answerQuestion(button.dataset.answer, button);
+});
+
+els.nextButton.addEventListener("click", () => {
+  playSound("click");
+  stopSpeech();
+  nextQuestion();
+});
+
+els.speakButton.addEventListener("click", speakCurrent);
+els.soundButton.addEventListener("click", toggleSound);
+els.backButton.addEventListener("click", goHome);
+els.againButton.addEventListener("click", () => startGame(state.mode.id));
+els.homeButton.addEventListener("click", goHome);
+</script>
+</body>
+</html>
